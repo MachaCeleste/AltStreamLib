@@ -3,7 +3,6 @@
 namespace AltStreamLib.Api.v1.Models;
 
 public record ChannelResponse(
-    [property: JsonPropertyName("id")] string Id,
     [property: JsonPropertyName("username")] string Username,
     [property: JsonPropertyName("displayName")] string DisplayName,
     [property: JsonPropertyName("avatarUrl")] string AvatarUrl,
