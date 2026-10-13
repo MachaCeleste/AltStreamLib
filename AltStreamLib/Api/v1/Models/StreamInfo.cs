@@ -7,5 +7,6 @@ public record StreamInfo(
     [property: JsonPropertyName("title")] string Title,
     [property: JsonPropertyName("viewers")] int Viewers,
     [property: JsonPropertyName("startedAt")] string StartedAt,
-    [property: JsonPropertyName("game")] GameInfo Game
+    [property: JsonPropertyName("game")] GameInfo Game,
+    [property: JsonPropertyName("tags")] string[] Tags
 );

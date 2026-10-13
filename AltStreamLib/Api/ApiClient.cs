@@ -1,7 +1,5 @@
 ﻿using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using AltStreamLib.Api.v1.Models;
 
 namespace AltStreamLib.Api
@@ -11,11 +9,6 @@ namespace AltStreamLib.Api
         public event Action<Exception> OnError;
 
         private readonly HttpClient _httpClient;
-        private static readonly JsonSerializerOptions _jsonOptions = new()
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-        };
 
         public ApiClient(HttpClient? httpClient = null)
         {
