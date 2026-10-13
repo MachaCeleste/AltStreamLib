@@ -34,6 +34,9 @@ namespace AltStreamLib.Api
         public async Task<ApiResponse<EmotesResponse>?> GetEmotesInfoAsync(string channelName) =>
             await SendRequestAsync<ApiResponse<EmotesResponse>>($"channels/{channelName}/emotes");
 
+        public async Task<ApiResponse<UserSettingsResponse>?> GetUserSettingsInfoAsync(string channelName) =>
+            await SendRequestAsync<ApiResponse<UserSettingsResponse>?>($"user-settings/{channelName}");
+
         private async Task<T?> SendRequestAsync<T>(string endpoint)
         {
             try
