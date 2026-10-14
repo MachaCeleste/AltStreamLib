@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Title>AltStream Lib</Title>
-    <Version>0.1.2</Version>
+    <Version>0.2.0</Version>
     <Authors>Macha Celeste</Authors>
     <Company>Celestial Corp</Company>
   </PropertyGroup>
@@ -17,5 +17,11 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DebugType>embedded</DebugType>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="SseClientLib">
+      <HintPath>..\..\SseClientLib\SseClientLib\bin\Release\net9.0\SseClientLib.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 
 </Project>
