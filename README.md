@@ -1,3 +1,5 @@
+Depends on [SseClientLib](https://github.com/MachaCeleste/SseClientLib)
+
 ## Simplified Implementation Example:
 ```cs
 using AltStreamLib.Api;
