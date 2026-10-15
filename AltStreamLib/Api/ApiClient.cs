@@ -48,7 +48,7 @@ namespace AltStreamLib.Api
             }
             catch (Exception ex)
             {
-                Logger.Log(LogLevel.Error, ex.Message, ex);
+                Logger.Singleton?.Log(LogLevel.Error, ex.Message, ex);
                 throw;
             }
         }

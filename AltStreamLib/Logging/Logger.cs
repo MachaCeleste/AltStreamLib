@@ -2,9 +2,13 @@
 
 public class Logger
 {
-    public static event Action<LogMessage>? OnLog;
+    public static Logger Singleton;
 
-    public static void Log(LogLevel logLevel, string message, Exception? error = null) =>
+    public Logger() => Singleton = this;
+
+    public event Action<LogMessage>? OnLog;
+
+    public void Log(LogLevel logLevel, string message, Exception? error = null) =>
         OnLog?.Invoke(new LogMessage(logLevel, message, error));
 }
 

@@ -48,7 +48,7 @@ public class EventSubClient : IDisposable
         _cts.Cancel();
 
     private void OnClientLog(string message) =>
-        Logger.Log(LogLevel.Info, message);
+        Logger.Singleton?.Log(LogLevel.Info, message);
 
     private void OnChatPayloadReceived(string payload)
     {
