@@ -1,7 +1,17 @@
-﻿using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
 
-namespace AltStreamLib.EventSub.Chat.Models.Events;
+namespace AltStreamLib.EventSub.Chat.Models.Events
+{
+    public class RaidCancel
+    {
+        [JsonProperty("sourceChannel")]
+        public string SourceChannel { get; set; }
 
-public record RaidCancel(
-    [property: JsonPropertyName("sourceChannel")] string SourceChannel
-);
+        public RaidCancel(string sourceChannel)
+        {
+            this.SourceChannel = sourceChannel;
+        }
+
+        public RaidCancel() { }
+    }
+}

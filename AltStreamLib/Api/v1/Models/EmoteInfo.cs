@@ -1,10 +1,29 @@
-﻿using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
 
-namespace AltStreamLib.Api.v1.Models;
+namespace AltStreamLib.Api.v1.Models
+{
+    public class EmoteInfo
+    {
+        [JsonProperty("id")]
+        public int Id { get; set; }
 
-public record EmoteInfo(
-    [property: JsonPropertyName("id")] int Id,
-    [property: JsonPropertyName("name")] string Name,
-    [property: JsonPropertyName("url")] string Url,
-    [property: JsonPropertyName("displayOrder")] int DisplayOrder
-);
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("url")]
+        public string Url { get; set; }
+
+        [JsonProperty("displayOrder")]
+        public int DisplayOrder { get; set; }
+
+        public EmoteInfo(int id, string name, string url, int displayOrder)
+        {
+            this.Id = id;
+            this.Name = name;
+            this.Url = url;
+            this.DisplayOrder = displayOrder;
+        }
+
+        public EmoteInfo() { }
+    }
+}

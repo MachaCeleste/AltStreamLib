@@ -1,8 +1,22 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 
-namespace AltStreamLib.Api.v1.Models;
+namespace AltStreamLib.Api.v1.Models
+{
+    public class RewardsResponse
+    {
+        [JsonProperty("channel")]
+        public string Channel { get; set; }
 
-public record RewardsResponse(
-    [property: JsonPropertyName("channel")] string Channel,
-    [property: JsonPropertyName("rewards")] List<RewardInfo> Rewards
-);
+        [JsonProperty("rewards")]
+        public List<RewardInfo> Rewards { get; set; }
+
+        public RewardsResponse(string channel, List<RewardInfo> rewards)
+        {
+            this.Channel = channel;
+            this.Rewards = rewards;
+        }
+
+        public RewardsResponse() { }
+    }
+}

@@ -1,13 +1,43 @@
-﻿using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
 
-namespace AltStreamLib.EventSub.Chat.Models.Events;
+namespace AltStreamLib.EventSub.Chat.Models.Events
+{
+    public class Shoutout
+    {
+        [JsonProperty("targetUsername")]
+        public string TargetUsername { get; set; }
 
-public record Shoutout(
-    [property: JsonPropertyName("targetUsername")] string TargetUsername,
-    [property: JsonPropertyName("targetDisplayName")] string TargetDisplayName,
-    [property: JsonPropertyName("targetAvatar")] string TargetAvatar,
-    [property: JsonPropertyName("targetBio")] string TargetBio,
-    [property: JsonPropertyName("gameName")] string GameName,
-    [property: JsonPropertyName("gameCover")] string GameCover,
-    [property: JsonPropertyName("shoutedBy")] string ShoutedBy
-);
+        [JsonProperty("targetDisplayName")]
+        public string TargetDisplayName { get; set; }
+
+        [JsonProperty("targetAvatar")]
+        public string TargetAvatar { get; set; }
+
+        [JsonProperty("targetBio")]
+        public string TargetBio { get; set; }
+
+        [JsonProperty("gameName")]
+        public string GameName { get; set; }
+
+        [JsonProperty("gameCover")]
+        public string GameCover { get; set; }
+
+        [JsonProperty("shoutedBy")]
+        public string ShoutedBy { get; set; }
+
+        public Shoutout(
+            string targetUsername, string targetDisplayName, string targetAvatar,
+            string targetBio, string gameName, string gameCover, string shoutedBy)
+        {
+            this.TargetUsername = targetUsername;
+            this.TargetDisplayName = targetDisplayName;
+            this.TargetAvatar = targetAvatar;
+            this.TargetBio = targetBio;
+            this.GameName = gameName;
+            this.GameCover = gameCover;
+            this.ShoutedBy = shoutedBy;
+        }
+
+        public Shoutout() { }
+    }
+}

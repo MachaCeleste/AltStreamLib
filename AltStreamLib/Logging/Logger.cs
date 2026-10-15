@@ -1,22 +1,35 @@
-﻿namespace AltStreamLib.Logging;
+﻿using System;
 
-public class Logger
+namespace AltStreamLib.Logging
 {
-    public static Logger Singleton;
+    public class Logger
+    {
+        public static Logger Singleton;
 
-    public Logger() => Singleton = this;
+        public Logger() => Singleton = this;
 
-    public event Action<LogMessage>? OnLog;
+        public event Action<LogMessage> OnLog;
 
-    public void Log(LogLevel logLevel, string message, Exception? error = null) =>
-        OnLog?.Invoke(new LogMessage(logLevel, message, error));
+        public void Log(LogLevel logLevel, string message, Exception error = null) =>
+            OnLog?.Invoke(new LogMessage(logLevel, message, error));
+    }
 }
 
-public record LogMessage(
-    LogLevel LogLevel,
-    string Message,
-    Exception? Error
-);
+public class LogMessage
+{
+    public LogLevel LogLevel { get; set; }
+    public string Message { get; set; }
+    public Exception Error { get; set; }
+
+    public LogMessage(LogLevel logLevel, string message, Exception error)
+    {
+        this.LogLevel = logLevel;
+        this.Message = message;
+        this.Error = error;
+    }
+
+    public LogMessage() { }
+}
 
 public enum LogLevel
 {

@@ -1,11 +1,33 @@
-﻿using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
 
-namespace AltStreamLib.EventSub.Chat.Models.Events;
+namespace AltStreamLib.EventSub.Chat.Models.Events
+{
+    public class Redemption
+    {
+        [JsonProperty("from")]
+        public string From { get; set; }
 
-public record Redemption(
-    [property: JsonPropertyName("from")] string From,
-    [property: JsonPropertyName("rewardName")] string RewardName,
-    [property: JsonPropertyName("cost")] int Cost,
-    [property: JsonPropertyName("pointsName")] string PointsName,
-    [property: JsonPropertyName("userInput")] string UserInput
-);
+        [JsonProperty("rewardName")]
+        public string RewardName { get; set; }
+
+        [JsonProperty("cost")]
+        public int Cost { get; set; }
+
+        [JsonProperty("pointsName")]
+        public string PointsName { get; set; }
+
+        [JsonProperty("userInput")]
+        public string UserInput { get; set; }
+
+        public Redemption(string from, string rewardName, int cost, string pointsName, string userInput)
+        {
+            this.From = from;
+            this.RewardName = rewardName;
+            this.Cost = cost;
+            this.PointsName = pointsName;
+            this.UserInput = userInput;
+        }
+
+        public Redemption() { }
+    }
+}

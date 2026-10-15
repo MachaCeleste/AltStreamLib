@@ -1,7 +1,17 @@
-﻿using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
 
-namespace AltStreamLib.Api.v1.Models;
+namespace AltStreamLib.Api.v1.Models
+{
+    public class ApiResponse<T>
+    {
+        [JsonProperty("data")]
+        public T Data { get; set; }
 
-public record ApiResponse<T>(
-    [property: JsonPropertyName("data")] T Data
-);
+        public ApiResponse(T data)
+        {
+            this.Data = data;
+        }
+
+        public ApiResponse() { }
+    }
+}
