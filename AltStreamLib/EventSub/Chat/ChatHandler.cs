@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using System.Text.RegularExpressions;
 using AltStreamLib.EventSub.Chat.Models;
 using AltStreamLib.EventSub.Chat.Models.Events;
 

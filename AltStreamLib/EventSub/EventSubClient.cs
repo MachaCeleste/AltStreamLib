@@ -19,6 +19,7 @@ public class EventSubClient : IDisposable
     public event Action<EventMessage>? OnMessageDeleted;
     public event Action<EventMessage>? OnMessagePinned;
     public event Action<EventMessage>? OnMessageUnPinned;
+    public event Action<EventMessage>? OnHighlightReceived;
     public event Action<EventMessage>? OnRedemptionReceived;
     public event Action<EventMessage>? OnRaidStarted;
     public event Action<EventMessage>? OnRaidCanceled;
@@ -67,6 +68,7 @@ public class EventSubClient : IDisposable
                 EventType.DeleteMessage => OnMessageDeleted,
                 EventType.Pin => OnMessagePinned,
                 EventType.Unpin => OnMessageUnPinned,
+                EventType.Highlight => OnHighlightReceived,
                 EventType.Redeem => OnRedemptionReceived,
                 EventType.RaidStart => OnRaidStarted,
                 EventType.RaidCancel => OnRaidCanceled,
