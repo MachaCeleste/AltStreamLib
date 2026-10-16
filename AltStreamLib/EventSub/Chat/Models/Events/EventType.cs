@@ -6,6 +6,7 @@
         Pin,
         Unpin,
         Redeem,
+        Highlight,
         RaidStart,
         RaidCancel,
         RaidReceived,
