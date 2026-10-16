@@ -6,6 +6,7 @@ public enum EventType
     Pin,
     Unpin,
     Redeem,
+    Highlight,
     RaidStart,
     RaidCancel,
     RaidReceived,

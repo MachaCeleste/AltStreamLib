@@ -54,6 +54,11 @@ internal class ChatHandler
             type = EventType.Redeem;
             eventObj = JsonSerializer.Deserialize<Redemption>(content["[REDEMPTION]:".Length..]);
         }
+        else if (content.StartsWith("[HIGHLIGHT]:", StringComparison.Ordinal))
+        {
+            type = EventType.Highlight;
+            eventObj = JsonSerializer.Deserialize<Highlight>(content["[HIGHLIGHT]:".Length..]);
+        }
         else if (content.StartsWith("[RAID_START]:", StringComparison.Ordinal))
         {
             type = EventType.RaidStart;
@@ -66,11 +71,13 @@ internal class ChatHandler
         }
         else if (content.Contains("is raiding with a party of", StringComparison.Ordinal))
         {
-            type = EventType.Pin;
-            Match match = Regex.Match(content, @"@(\S+).*""(\d+)""");
-            eventObj = new RaidIncoming(
-                match.Success ? match.Groups[1].Value : "Unknown",
-                match.Success ? int.Parse(match.Groups[2].Value) : 0);
+            type = EventType.RaidReceived;
+            string username = content.Substring(1, content.IndexOf(' ') - 1);
+
+            int start = content.IndexOf("party of \"") + 10;
+            int end = content.IndexOf('\"', start);
+            int viewers = int.Parse(content.Substring(start, end - start));
+            eventObj = new RaidIncoming(username, viewers);
         }
         else if (content.StartsWith("[SHOUTOUT]:", StringComparison.Ordinal))
         {
