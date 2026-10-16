@@ -22,6 +22,7 @@ namespace AltStreamLib.EventSub
         public event Action<EventMessage> OnMessageDeleted;
         public event Action<EventMessage> OnMessagePinned;
         public event Action<EventMessage> OnMessageUnPinned;
+        public event Action<EventMessage> OnHighlightReceived;
         public event Action<EventMessage> OnRedemptionReceived;
         public event Action<EventMessage> OnRaidStarted;
         public event Action<EventMessage> OnRaidCanceled;
@@ -77,6 +78,9 @@ namespace AltStreamLib.EventSub
                         break;
                     case EventType.Unpin:
                         handler = OnMessageUnPinned;
+                        break;
+                    case EventType.Highlight:
+                        handler = OnHighlightReceived;
                         break;
                     case EventType.Redeem:
                         handler = OnRedemptionReceived;

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using AltStreamLib.EventSub.Chat.Models;
 using AltStreamLib.EventSub.Chat.Models.Events;
