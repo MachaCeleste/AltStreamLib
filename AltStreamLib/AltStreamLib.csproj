@@ -4,7 +4,7 @@
     <TargetFramework>net46</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
     <Title>AltStream Lib</Title>
-    <Version>0.2.6</Version>
+    <Version>0.2.11</Version>
     <Authors>Macha Celeste</Authors>
     <Company>Celestial Corp</Company>
   </PropertyGroup>
@@ -23,9 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="SseClientLib">
-      <HintPath>..\..\SseClientLib\SseClientLib\bin\Release\net46\SseClientLib.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\..\SseClientLib\SseClientLib\SseClientLib.csproj" />
   </ItemGroup>
 
 </Project>
