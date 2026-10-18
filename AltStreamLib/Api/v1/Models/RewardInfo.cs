@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace AltStreamLib.Api.v1.Models
 {
@@ -22,6 +23,9 @@ namespace AltStreamLib.Api.v1.Models
         [JsonProperty("isHighlight")]
         public bool IsHighlight { get; set; }
 
+        [JsonProperty("requireUserInput")]
+        public bool RequireUserInput { get; set; }
+
         [JsonProperty("cooldownSeconds")]
         public int? CooldownSeconds { get; set; }
 
@@ -36,8 +40,8 @@ namespace AltStreamLib.Api.v1.Models
 
         public RewardInfo(
             int id, string name, string description, int cost, bool enabled,
-            bool isHighlight, int? cooldownSeconds, int? globalCooldownSeconds,
-            int? maxPerStream, int? maxGlobalPerStream)
+            bool isHighlight, bool requiresUserInput, int? cooldownSeconds,
+            int? globalCooldownSeconds, int? maxPerStream, int? maxGlobalPerStream)
         {
             this.Id = id;
             this.Name = name;
@@ -45,6 +49,7 @@ namespace AltStreamLib.Api.v1.Models
             this.Cost = cost;
             this.Enabled = enabled;
             this.IsHighlight = isHighlight;
+            this.RequireUserInput = requiresUserInput;
             this.CooldownSeconds = cooldownSeconds;
             this.GlobalCooldownSeconds = globalCooldownSeconds;
             this.MaxPerStream = maxPerStream;

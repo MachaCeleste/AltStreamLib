@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using AltStreamLib.EventSub.Chat.Models;
 using AltStreamLib.EventSub.Chat.Models.Events;
+using AltStreamLib.Logging;
 
 namespace AltStreamLib.EventSub.Chat
 {
@@ -18,6 +19,7 @@ namespace AltStreamLib.EventSub.Chat
             }
             catch (JsonException ex)
             {
+                Logger.Singleton?.Log(LogLevel.Error, ex.Message, ex);
                 return false;
             }
 
