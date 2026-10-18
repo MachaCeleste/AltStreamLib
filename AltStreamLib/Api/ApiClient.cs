@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Json;
 using System.Net.Http.Headers;
 using AltStreamLib.Api.v1.Models;
+using AltStreamLib.Api.Chat.Models;
 using AltStreamLib.Logging;
 
 namespace AltStreamLib.Api
@@ -33,8 +34,14 @@ namespace AltStreamLib.Api
         public async Task<ApiResponse<EmotesResponse>?> GetEmotesInfoAsync(string channelName) =>
             await SendRequestAsync<ApiResponse<EmotesResponse>>($"v1/channels/{channelName}/emotes");
 
+        public async Task<ApiResponse<TagsResponse>?> GetTagsInfoAsync(string channelName) =>
+            await SendRequestAsync<ApiResponse<TagsResponse>>($"v1/channels/{channelName}/tags");
+
         public async Task<UserSettingsResponse?> GetUserSettingsInfoAsync(string channelName) =>
-            await SendRequestAsync<UserSettingsResponse?>($"v1/user-settings/{channelName}");
+            await SendRequestAsync<UserSettingsResponse>($"v1/user-settings/{channelName}");
+
+        public async Task<ModResponse?> GetModInfoAsync(string channelName) =>
+            await SendRequestAsync<ModResponse>($"chat/mod?channel={channelName}");
 
         private async Task<T?> SendRequestAsync<T>(string endpoint)
         {
@@ -44,6 +51,7 @@ namespace AltStreamLib.Api
             }
             catch (HttpRequestException ex)
             {
+                Logger.Singleton?.Log(LogLevel.Error, ex.Message, ex);
                 return default;
             }
             catch (Exception ex)

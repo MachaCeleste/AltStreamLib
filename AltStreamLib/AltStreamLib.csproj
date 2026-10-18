@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Title>AltStream Lib</Title>
-    <Version>0.2.11</Version>
+    <Version>0.2.16</Version>
     <Authors>Macha Celeste</Authors>
     <Company>Celestial Corp</Company>
   </PropertyGroup>
@@ -21,5 +21,9 @@
   <ItemGroup>
     <ProjectReference Include="..\..\SseClientLib\SseClientLib\SseClientLib.csproj" />
   </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="if &quot;$(Configuration)&quot;==&quot;Release&quot; call :Package&#xD;&#xA;goto :EOF&#xD;&#xA;&#xD;&#xA;:Package&#xD;&#xA;SET &quot;WINRAR_PATH=C:\Program Files\WinRAR\Rar.exe&quot;&#xD;&#xA;SET &quot;BUILD_ROOT=$(ProjectDir)..\Builds&quot;&#xD;&#xA;SET &quot;SOURCE_DIR=$(TargetDir)&quot;&#xD;&#xA;SET &quot;FRAMEWORK=$(TargetFramework)&quot;&#xD;&#xA;SET &quot;ARCHIVE_NAME=$(ProjectName)-v$(Version)-%25FRAMEWORK%25.rar&quot;&#xD;&#xA;if not exist &quot;%25BUILD_ROOT%25&quot; mkdir &quot;%25BUILD_ROOT%25&quot;&#xD;&#xA;&quot;%25WINRAR_PATH%25&quot; a -ep1 -r &quot;%25BUILD_ROOT%25\%25ARCHIVE_NAME%25&quot; &quot;%25SOURCE_DIR%25*&quot;&#xD;&#xA;" />
+  </Target>
 
 </Project>
