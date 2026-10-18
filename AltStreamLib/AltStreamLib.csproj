@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Title>AltStream Lib</Title>
-    <Version>0.2.6</Version>
+    <Version>0.2.11</Version>
     <Authors>Macha Celeste</Authors>
     <Company>Celestial Corp</Company>
   </PropertyGroup>
@@ -19,9 +19,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="SseClientLib">
-      <HintPath>..\..\SseClientLib\SseClientLib\bin\Release\net9.0\SseClientLib.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\..\SseClientLib\SseClientLib\SseClientLib.csproj" />
   </ItemGroup>
 
 </Project>

@@ -14,6 +14,9 @@ public class EventSubClient : IDisposable
 
     private readonly SseClient _sseClient;
 
+    public event Action? OnConnected;
+    public event Action? OnDisconnected;
+
     public event Action<Message>? OnMessageReceived;
 
     public event Action<EventMessage>? OnMessageDeleted;
@@ -39,6 +42,9 @@ public class EventSubClient : IDisposable
 
         _sseClient = new SseClient(chatEndpoint, channel);
         _sseClient.OnLog += OnClientLog;
+        _sseClient.OnError += OnClientError;
+        _sseClient.OnConnected += OnClientConnected;
+        _sseClient.OnDisconnected += OnClientDisconnected;
         _sseClient.OnRawMessageReceived += OnChatPayloadReceived;
     }
 
@@ -48,8 +54,17 @@ public class EventSubClient : IDisposable
     public async Task DisconnectAsync() =>
         _cts.Cancel();
 
+    private void OnClientConnected() =>
+        OnConnected?.Invoke();
+
+    private void OnClientDisconnected() =>
+        OnDisconnected?.Invoke();
+
     private void OnClientLog(string message) =>
         Logger.Singleton?.Log(LogLevel.Info, message);
+
+    private void OnClientError(string message, Exception ex) =>
+        Logger.Singleton?.Log(LogLevel.Error, message, ex);
 
     private void OnChatPayloadReceived(string payload)
     {
