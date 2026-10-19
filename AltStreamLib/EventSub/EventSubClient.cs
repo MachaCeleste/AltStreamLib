@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using SseClientLib;
@@ -13,10 +14,18 @@ namespace AltStreamLib.EventSub
     {
         public string ChannelName { get; private set; }
 
-        private readonly CancellationTokenSource _cts = new CancellationTokenSource();
+        private const string _chatEndpoint = "https://altstream.online/api/chat/stream";
+        private readonly string _channel;
 
-        private readonly SseClient _sseClient;
+        private SseClient _sseClient;
+        private Task _connectionTask;
+        private readonly CancellationTokenSource _shutdownCts = new CancellationTokenSource();
 
+        private int _reconnectionAttempts;
+        private const int MaxReconnectionAttempts = 5;
+        private readonly TimeSpan _baseReconnectDelay = TimeSpan.FromSeconds(2);
+
+        public event Action OnPing;
         public event Action OnConnected;
         public event Action OnDisconnected;
 
@@ -37,98 +46,237 @@ namespace AltStreamLib.EventSub
 
         public EventSubClient(string channelName)
         {
+            if (string.IsNullOrEmpty(channelName))
+            {
+                var ex = new ArgumentNullException(nameof(channelName));
+                Logger.Singleton?.Log(LogLevel.Error, ex.Message, ex);
+                throw ex;
+            }
+
             ChannelName = channelName;
 
-            string chatEndpoint = "https://altstream.online/api/chat/stream";
+            _channel = $"channel={channelName}";
 
-            var channel = $"channel={channelName}";
-
-            _sseClient = new SseClient(chatEndpoint, channel);
-            _sseClient.OnLog += OnClientLog;
-            _sseClient.OnError += OnClientError;
-            _sseClient.OnConnected += OnClientConnected;
-            _sseClient.OnDisconnected += OnClientDisconnected;
-            _sseClient.OnRawMessageReceived += OnChatPayloadReceived;
+            _sseClient = new SseClient(_chatEndpoint, _channel, null);
         }
 
-        public async Task ConnectAsync() =>
-            await _sseClient.ConnectAsync(_cts.Token);
-
-        public async Task DisconnectAsync() =>
-            _cts.Cancel();
-
-        private void OnClientConnected() =>
-            OnConnected?.Invoke();
-
-        private void OnClientDisconnected() =>
-            OnDisconnected?.Invoke();
-
-        private void OnClientLog(string message) =>
-            Logger.Singleton?.Log(LogLevel.Info, message);
-
-        private void OnClientError(string message, Exception ex) =>
-            Logger.Singleton?.Log(LogLevel.Error, message, ex);
-
-        private void OnChatPayloadReceived(string payload)
+        public async Task ConnectAsync()
         {
-            if (!ChatHandler.TryDeserializeChatPayload(payload, out var message) || message is null)
-                return;
+            Logger.Singleton?.Log(LogLevel.Info, "Starting SSE connection manager...");
+            _connectionTask = MaintainConnectionAsync(_shutdownCts.Token);
+            await Task.CompletedTask;
+        }
 
-            if (message is Message msg)
-            {
-                OnMessageReceived?.Invoke(msg);
-                return;
-            }
-            else if (message is EventMessage eventMsg)
-            {
-                Action<EventMessage> handler;
+        public async Task DisconnectAsync()
+        {
+            Logger.Singleton?.Log(LogLevel.Info, "Stopping SSE connection manager...");
+            _shutdownCts.Cancel();
 
-                switch (eventMsg.EventType)
+            if (_connectionTask != null)
+            {
+                try
                 {
-                    case EventType.DeleteMessage:
-                        handler = OnMessageDeleted;
-                        break;
-                    case EventType.Pin:
-                        handler = OnMessagePinned;
-                        break;
-                    case EventType.Unpin:
-                        handler = OnMessageUnPinned;
-                        break;
-                    case EventType.Highlight:
-                        handler = OnHighlightReceived;
-                        break;
-                    case EventType.Redeem:
-                        handler = OnRedemptionReceived;
-                        break;
-                    case EventType.RaidStart:
-                        handler = OnRaidStarted;
-                        break;
-                    case EventType.RaidCancel:
-                        handler = OnRaidCanceled;
-                        break;
-                    case EventType.RaidReceived:
-                        handler = OnRaidReceived;
-                        break;
-                    case EventType.Shoutout:
-                        handler = OnShoutoutReceived;
-                        break;
-                    case EventType.ClearChat:
-                        handler = OnClearChatReceived;
-                        break;
-                    default:
-                        handler = OnUnhandledReceived;
-                        break;
+                    await _connectionTask;
+                }
+                catch (OperationCanceledException)
+                {
+                    Logger.Singleton?.Log(LogLevel.Info, "Connection task canceled.");
+                }
+            }
+
+            _sseClient?.Dispose();
+        }
+
+        private async Task MaintainConnectionAsync(CancellationToken cancellationToken)
+        {
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                try
+                {
+                    await ConnectWithReconnectAsync(cancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    Logger.Singleton?.Log(LogLevel.Info, "Connection maintenance canceled.");
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    Logger.Singleton?.Log(LogLevel.Error, $"Unexpected error in connection loop: {ex.Message}", ex);
+                    await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken).ConfigureAwait(false);
+                }
+            }
+        }
+
+        private async Task ConnectWithReconnectAsync(CancellationToken cancellationToken)
+        {
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                _sseClient = new SseClient(_chatEndpoint, _channel, TimeSpan.FromSeconds(45));
+
+                SubscribeClientEvents();
+
+                try
+                {
+                    Logger.Singleton?.Log(LogLevel.Info, $"Attempt {_reconnectionAttempts + 1}/{MaxReconnectionAttempts} to connect...");
+                    await _sseClient.ConnectAsync(cancellationToken);
+
+                    _reconnectionAttempts = 0;
+                    Logger.Singleton?.Log(LogLevel.Info, "Connection closed by server.");
+                }
+                catch (OperationCanceledException)
+                {
+                    Logger.Singleton?.Log(LogLevel.Info, "Connection canceled.");
+                    throw;
+                }
+                catch (TimeoutException ex)
+                {
+                    Logger.Singleton?.Log(LogLevel.Warn, $"Keep-alive timeout: {ex.Message}", ex);
+                    _reconnectionAttempts++;
+                }
+                catch (HttpRequestException ex)
+                {
+                    Logger.Singleton?.Log(LogLevel.Warn, $"Http error: {ex.Message}", ex);
+                    _reconnectionAttempts++;
+                }
+                catch (Exception ex)
+                {
+                    Logger.Singleton?.Log(LogLevel.Error, $"Connection error: {ex.Message}", ex);
+                    _reconnectionAttempts++;
+                }
+                finally
+                {
+                    _sseClient?.Dispose();
+                    _sseClient = null;
                 }
 
-                handler?.Invoke(eventMsg);
+                if (_reconnectionAttempts >= MaxReconnectionAttempts)
+                {
+                    Logger.Singleton?.Log(LogLevel.Error, $"Max reconnection attempts ({MaxReconnectionAttempts}) reached. Reconnect manually.");
+                    OnDisconnected?.Invoke();
+                    break;
+                }
+
+                TimeSpan delay = TimeSpan.FromTicks((long)(_baseReconnectDelay.Ticks
+                    * Math.Pow(2, _reconnectionAttempts - 1)))
+                    + TimeSpan.FromTicks(new Random().Next(0, 1000) * 10);
+
+                Logger.Singleton?.Log(LogLevel.Info,
+                    $"Reconnecting in {delay.TotalSeconds:F1}s " +
+                    $"(attempt {_reconnectionAttempts}/{MaxReconnectionAttempts})...");
+
+                try
+                {
+                    await Task.Delay(delay, cancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
             }
+        }
+
+        private void SubscribeClientEvents()
+        {
+            if (_sseClient is null)
+                return;
+
+            _sseClient.OnConnected += () =>
+            {
+                Logger.Singleton?.Log(LogLevel.Info, "Connected!");
+                _reconnectionAttempts = 0;
+                OnConnected?.Invoke();
+            };
+
+            _sseClient.OnDisconnected += () =>
+            {
+                Logger.Singleton?.Log(LogLevel.Info, "Disconnected.");
+                OnDisconnected?.Invoke();
+            };
+
+            _sseClient.OnRawMessageReceived += (string payload) =>
+            {
+                try
+                {
+                    if (!ChatHandler.TryDeserializeChatPayload(payload, out var message) || message is null)
+                        return;
+
+                    if (message is Message msg)
+                    {
+                        OnMessageReceived?.Invoke(msg);
+                        return;
+                    }
+                    else if (message is EventMessage eventMsg)
+                    {
+                        Action<EventMessage> handler;
+
+                        switch (eventMsg.EventType)
+                        {
+                            case EventType.DeleteMessage:
+                                handler = OnMessageDeleted;
+                                break;
+                            case EventType.Pin:
+                                handler = OnMessagePinned;
+                                break;
+                            case EventType.Unpin:
+                                handler = OnMessageUnPinned;
+                                break;
+                            case EventType.Highlight:
+                                handler = OnHighlightReceived;
+                                break;
+                            case EventType.Redeem:
+                                handler = OnRedemptionReceived;
+                                break;
+                            case EventType.RaidStart:
+                                handler = OnRaidStarted;
+                                break;
+                            case EventType.RaidCancel:
+                                handler = OnRaidCanceled;
+                                break;
+                            case EventType.RaidReceived:
+                                handler = OnRaidReceived;
+                                break;
+                            case EventType.Shoutout:
+                                handler = OnShoutoutReceived;
+                                break;
+                            case EventType.ClearChat:
+                                handler = OnClearChatReceived;
+                                break;
+                            default:
+                                handler = OnUnhandledReceived;
+                                break;
+                        }
+
+                        handler?.Invoke(eventMsg);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Singleton?.Log(LogLevel.Error, ex.Message, ex);
+                }
+            };
+
+            _sseClient.OnLog += (string message) =>
+            {
+                Logger.Singleton?.Log(LogLevel.Info, message);
+            };
+
+            _sseClient.OnError += (string message, Exception ex) =>
+            {
+                Logger.Singleton?.Log(LogLevel.Error, message, ex);
+            };
+
+            _sseClient.OnPing += () =>
+            {
+                Logger.Singleton?.Log(LogLevel.Ping, "PING");
+            };
         }
 
         public void Dispose()
         {
-            _cts?.Cancel();
-            _cts?.Dispose();
+            _shutdownCts?.Cancel();
             _sseClient?.Dispose();
+            _shutdownCts?.Dispose();
         }
     }
 }

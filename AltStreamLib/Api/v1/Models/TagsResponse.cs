@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace AltStreamLib.Api.v1.Models
 {
@@ -9,9 +8,9 @@ namespace AltStreamLib.Api.v1.Models
         public string Channel { get; set; }
 
         [JsonProperty("tags")]
-        public List<string> Tags { get; set; }
+        public string[] Tags { get; set; }
 
-        public TagsResponse(string channel, List<string> tags)
+        public TagsResponse(string channel, string[] tags)
         {
             this.Channel = channel;
             this.Tags = tags;

@@ -8,7 +8,7 @@ namespace AltStreamLib.EventSub.Chat.Models.Events
         public string Channel { get; set; }
 
         [JsonProperty("messageId")]
-        public string MessageId { get; set; }
+        public int MessageId { get; set; }
 
         [JsonProperty("auhtor")]
         public string Author { get; set; }
@@ -22,6 +22,9 @@ namespace AltStreamLib.EventSub.Chat.Models.Events
         [JsonProperty("text")]
         public string Text { get; set; }
 
+        [JsonProperty("stickerUrl")]
+        public string StickerUrl { get; set; }
+
         [JsonProperty("userColor")]
         public string UserColor { get; set; }
 
@@ -32,8 +35,9 @@ namespace AltStreamLib.EventSub.Chat.Models.Events
         public string CreatedAt { get; set; }
 
         public ChatPin(
-            string channel, string messageId, string author, string authorUsername,
-            string authorImage, string text, string userColor, string pinnedBy, string createdAt)
+            string channel, int messageId, string author, string authorUsername,
+            string authorImage, string text, string stickerUrl,
+            string userColor, string pinnedBy, string createdAt)
         {
             this.Channel = channel;
             this.MessageId = messageId;
@@ -41,6 +45,7 @@ namespace AltStreamLib.EventSub.Chat.Models.Events
             this.AuthorUsername = authorUsername;
             this.AuthorImage = authorImage;
             this.Text = text;
+            this.StickerUrl = stickerUrl;
             this.UserColor = userColor;
             this.PinnedBy = pinnedBy;
             this.CreatedAt = createdAt;
