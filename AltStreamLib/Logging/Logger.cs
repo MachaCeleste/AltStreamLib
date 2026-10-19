@@ -22,5 +22,6 @@ public enum LogLevel
 {
     Info,
     Warn,
-    Error
+    Error,
+    Ping
 }
