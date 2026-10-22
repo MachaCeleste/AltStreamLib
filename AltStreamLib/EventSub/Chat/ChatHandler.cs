@@ -42,60 +42,117 @@ namespace AltStreamLib.EventSub.Chat
             var type = EventType.None;
             object eventObj = null;
 
-            if (content.StartsWith("[CHAT_PIN]:", StringComparison.Ordinal))
+            switch (content)
             {
-                type = EventType.Pin;
-                eventObj = JsonConvert.DeserializeObject<ChatPin>(content.Substring("[CHAT_PIN]:".Length));
-            }
-            else if (content.StartsWith("[CHAT_UNPIN]", StringComparison.Ordinal))
-            {
-                type = EventType.Unpin;
-                eventObj = null;
-            }
-            else if (content.StartsWith("[REDEMPTION]:", StringComparison.Ordinal))
-            {
-                type = EventType.Redeem;
-                eventObj = JsonConvert.DeserializeObject<Redemption>(content.Substring("[REDEMPTION]:".Length));
-            }
-            else if (content.StartsWith("[HIGHLIGHT]:", StringComparison.Ordinal))
-            {
-                type = EventType.Highlight;
-                eventObj = JsonConvert.DeserializeObject<Highlight>(content.Substring("[HIGHLIGHT]:".Length));
-            }
-            else if (content.StartsWith("[RAID_START]:", StringComparison.Ordinal))
-            {
-                type = EventType.RaidStart;
-                eventObj = JsonConvert.DeserializeObject<RaidStart>(content.Substring("[RAID_START]:".Length));
-            }
-            else if (content.StartsWith("[RAID_CANCEL]:", StringComparison.Ordinal))
-            {
-                type = EventType.RaidCancel;
-                eventObj = JsonConvert.DeserializeObject<RaidCancel>(content.Substring("[RAID_CANCEL]:".Length));
-            }
-            else if (content.Contains("is raiding with a party of"))
-            {
-                type = EventType.RaidReceived;
-                string username = content.Substring(1, content.IndexOf(' ') - 1);
+                case string header when header.StartsWith("[CHAT_PIN]:", StringComparison.Ordinal):
+                    {
+                        type = EventType.Pin;
+                        eventObj = JsonConvert.DeserializeObject<ChatPin>(content.Substring("[CHAT_PIN]:".Length));
+                        break;
+                    }
 
-                int start = content.IndexOf("party of \"") + 10;
-                int end = content.IndexOf('\"', start);
-                int viewers = int.Parse(content.Substring(start, end - start));
-                eventObj = new RaidIncoming(username, viewers);
-            }
-            else if (content.StartsWith("[SHOUTOUT]:", StringComparison.Ordinal))
-            {
-                type = EventType.Shoutout;
-                eventObj = JsonConvert.DeserializeObject<Shoutout>(content.Substring("[SHOUTOUT]:".Length));
-            }
-            else if (content.Equals("[CLEAR_CHAT]", StringComparison.Ordinal))
-            {
-                type = EventType.ClearChat;
-                eventObj = null;
-            }
-            else if (content.StartsWith("[DELETE]:", StringComparison.Ordinal))
-            {
-                type = EventType.DeleteMessage;
-                eventObj = content.Substring("[DELETE]:".Length);
+                case string header when header.StartsWith("[CHAT_UNPIN]", StringComparison.Ordinal):
+                    {
+                        type = EventType.Unpin;
+                        eventObj = null;
+                        break;
+                    }
+
+                case string header when header.StartsWith("[REDEMPTION]:", StringComparison.Ordinal):
+                    {
+                        type = EventType.Redeem;
+                        eventObj = JsonConvert.DeserializeObject<Redemption>(content.Substring("[REDEMPTION]:".Length));
+                        break;
+                    }
+
+                case string header when header.StartsWith("[HIGHLIGHT]:", StringComparison.Ordinal):
+                    {
+                        type = EventType.Highlight;
+                        eventObj = JsonConvert.DeserializeObject<Highlight>(content.Substring("[HIGHLIGHT]:".Length));
+                        break;
+                    }
+
+                case string header when header.StartsWith("[STREAMER_ONLY_FOLLOW]:", StringComparison.Ordinal):
+                    {
+                        type = EventType.Follow;
+                        eventObj = header.Substring("[STREAMER_ONLY_FOLLOW]:".Length);
+                        break;
+                    }
+
+                case string header when header.StartsWith("[KOFI_TIP]:", StringComparison.Ordinal):
+                    {
+                        type = EventType.Tip;
+                        eventObj = JsonConvert.DeserializeObject<KofiEvent>(header.Substring("[KOFI_TIP]:".Length));
+                        break;
+                    }
+
+                case string header when header.StartsWith("[KOFI_SUB]:", StringComparison.Ordinal):
+                    {
+                        type = EventType.Subscription;
+                        eventObj = JsonConvert.DeserializeObject<KofiEvent>(header.Substring("[KOFI_SUB]:".Length));
+                        break;
+                    }
+
+                case string header when header.StartsWith("[KOFI_SHOP]:", StringComparison.Ordinal):
+                    {
+                        type = EventType.Shop;
+                        eventObj = JsonConvert.DeserializeObject<KofiEvent>(header.Substring("[KOFI_SHOP]:".Length));
+                        break;
+                    }
+
+                case string header when header.StartsWith("[RAID_START]:", StringComparison.Ordinal):
+                    {
+                        type = EventType.RaidStart;
+                        eventObj = JsonConvert.DeserializeObject<RaidStart>(content.Substring("[RAID_START]:".Length));
+                        break;
+                    }
+
+                case string header when header.StartsWith("[RAID_CANCEL]:", StringComparison.Ordinal):
+                    {
+                        type = EventType.RaidCancel;
+                        eventObj = JsonConvert.DeserializeObject<RaidCancel>(content.Substring("[RAID_CANCEL]:".Length));
+                        break;
+                    }
+
+                case string header when header.Contains("is raiding with a party of"):
+                    {
+                        type = EventType.RaidReceived;
+                        string username = content.Substring(1, content.IndexOf(' ') - 1);
+
+                        int start = header.IndexOf("party of \"") + 10;
+                        int end = header.IndexOf('\"', start);
+                        int viewers = int.Parse(header.Substring(start, end - start));
+                        eventObj = new RaidIncoming(username, viewers);
+                        break;
+                    }
+
+                case string header when header.StartsWith("[SHOUTOUT]:", StringComparison.Ordinal):
+                    {
+                        type = EventType.Shoutout;
+                        eventObj = JsonConvert.DeserializeObject<Shoutout>(content.Substring("[SHOUTOUT]:".Length));
+                        break;
+                    }
+
+                case string header when header.Equals("[CLEAR_CHAT]", StringComparison.Ordinal):
+                    {
+                        type = EventType.ClearChat;
+                        eventObj = null;
+                        break;
+                    }
+
+                case string header when header.StartsWith("[DELETE]:", StringComparison.Ordinal):
+                    {
+                        type = EventType.DeleteMessage;
+                        eventObj = content.Substring("[DELETE]:".Length);
+                        break;
+                    }
+
+                case string header when header.StartsWith("[SYSTEM_ALERT]:", StringComparison.Ordinal):
+                    {
+                        type = EventType.SystemMessage;
+                        eventObj = header.Substring("[SYSTEM_ALERT]:".Length);
+                        break;
+                    }
             }
 
             return new KeyValuePair<EventType, object>(type, eventObj);

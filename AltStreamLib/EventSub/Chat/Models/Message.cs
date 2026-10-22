@@ -43,11 +43,14 @@ namespace AltStreamLib.EventSub.Chat.Models
         [JsonProperty("userColor")]
         public string UserColor { get; set; }
 
+        [JsonProperty("isSubscriber")]
+        public string IsSubsctiber { get; set; }
+
         public Message(
             string id, string author, string text, string source, long sentAt,
             string channel, string authorUsername, string authorImage,
             string replyToId, string replyToAuthor, string replyToUsername,
-            string stickerUrl, string userColor)
+            string stickerUrl, string userColor, string isSubsctiber)
         {
             this.Id = id;
             this.Author = author;
@@ -62,6 +65,7 @@ namespace AltStreamLib.EventSub.Chat.Models
             this.ReplyToUsername = replyToUsername;
             this.StickerUrl = stickerUrl;
             this.UserColor = userColor;
+            this.IsSubsctiber = isSubsctiber;
         }
 
         public Message() { }

@@ -6,7 +6,11 @@ namespace AltStreamLib.Logging
     {
         public static Logger Singleton;
 
-        public Logger() => Singleton = this;
+        public Logger()
+        {
+            if (Singleton == null)
+                Singleton = this;
+        }
 
         public event Action<LogMessage> OnLog;
 
