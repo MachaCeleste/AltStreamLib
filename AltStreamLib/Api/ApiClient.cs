@@ -10,6 +10,10 @@ namespace AltStreamLib.Api
     {
         private readonly HttpClient _httpClient;
 
+        /// <summary>
+        /// Initialize new API Client (Rate limit is 60 Requests/minute)
+        /// </summary>
+        /// <param name="httpClient"></param>
         public ApiClient(HttpClient? httpClient = null)
         {
             _httpClient = httpClient ?? new()
@@ -40,6 +44,10 @@ namespace AltStreamLib.Api
         public async Task<UserSettingsResponse?> GetUserSettingsInfoAsync(string channelName) =>
             await SendRequestAsync<UserSettingsResponse>($"v1/user-settings/{channelName}");
 
+        /// <summary>
+        /// UNDOCUMENTED - Requests moderators for given channel
+        /// </summary>
+        /// <param name="channelName">The channel to query</param>
         public async Task<ModResponse?> GetModInfoAsync(string channelName) =>
             await SendRequestAsync<ModResponse>($"chat/mod?channel={channelName}");
 

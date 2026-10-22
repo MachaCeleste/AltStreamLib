@@ -15,5 +15,6 @@ public record Message(
     [property: JsonPropertyName("replyToAuthor")] string? ReplyToAuthor,
     [property: JsonPropertyName("replyToUsername")] string? ReplyToUsername,
     [property: JsonPropertyName("stickerUrl")] string? StickerUrl,
-    [property: JsonPropertyName("userColor")] string? UserColor
+    [property: JsonPropertyName("userColor")] string? UserColor,
+    [property: JsonPropertyName("isSubscriber")] bool? IsSubscriber
 );
