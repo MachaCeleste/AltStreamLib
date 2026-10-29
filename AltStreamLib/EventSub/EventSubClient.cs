@@ -1,10 +1,11 @@
-﻿using SseClientLib;
+﻿using System.Reflection;
+using System.Diagnostics;
+using SseClientLib;
 using AltStreamLib.EventSub.Chat;
 using AltStreamLib.EventSub.Chat.Models;
-using AltStreamLib.EventSub.Chat.Models.Events;
 using AltStreamLib.Logging;
-using System.Diagnostics;
-using System.Reflection;
+using AltStreamLib.Utils;
+using AltStreamLib.EventSub.Chat.Models.Events;
 
 namespace AltStreamLib.EventSub;
 
@@ -12,15 +13,9 @@ public class EventSubClient : IDisposable
 {
     public string ChannelName { get; private set; }
 
-    private const string _chatEndpoint = "https://altstream.online/api/chat/stream";
-    private readonly string _channel;
-
-    private FileVersionInfo _libraryInfo;
-    private FileVersionInfo _externalCallerInfo;
-
-    private SseClient? _sseClient;
+    private readonly SseClient? _sseClient;
     private Task? _connectionTask;
-    private CancellationTokenSource _shutdownCts;
+    private CancellationTokenSource? _shutdownCts;
 
     private int _reconnectionAttempts;
     private const int MaxReconnectionAttempts = 5;
@@ -124,7 +119,7 @@ public class EventSubClient : IDisposable
     /// <summary>
     /// Called when a SystemMessage event is received
     /// </summary>
-    public event Action<EventMessage> OnSystemMessageReceived;
+    public event Action<EventMessage>? OnSystemMessageReceived;
 
     /// <summary>
     /// Called when an event is received that doesnt fit any event model
@@ -137,7 +132,7 @@ public class EventSubClient : IDisposable
     /// EventSubClient using SSEClient to connect to chat endpoint (read only)
     /// </summary>
     /// <param name="channelName">Channel to connect with</param>
-    public EventSubClient(string channelName)
+    public EventSubClient(string channelName, string? cookieJson = null)
     {
         if (string.IsNullOrEmpty(channelName))
         {
@@ -148,15 +143,21 @@ public class EventSubClient : IDisposable
 
         ChannelName = channelName;
 
-        _channel = $"channel={channelName}";
+        if (HttpManager.Singleton is null)
+        {
+            Assembly? assembly = Assembly.GetCallingAssembly();
+            var externalCallerInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
+            new HttpManager(externalCallerInfo, cookieJson);
+        }
 
-        Assembly? libAssembly = Assembly.GetExecutingAssembly();
-        _libraryInfo = FileVersionInfo.GetVersionInfo(libAssembly.Location);
+        if (HttpManager.Singleton is null)
+        {
+            var ex = new NullReferenceException(nameof(HttpManager.Singleton));
+            Logger.Singleton?.Log(LogLevel.Error, ex.Message, ex);
+            throw ex;
+        }
 
-        Assembly? assembly = Assembly.GetCallingAssembly();
-        _externalCallerInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
-
-        _sseClient = new SseClient(_chatEndpoint, _channel, TimeSpan.FromSeconds(45));
+        _sseClient = new SseClient("chat/stream", $"channel={channelName}", HttpManager.Singleton.Client, TimeSpan.FromSeconds(45));
 
         SubscribeSseClientEvents();
     }
@@ -194,6 +195,13 @@ public class EventSubClient : IDisposable
             }
         }
     }
+
+    public void Dispose()
+    {
+        _shutdownCts?.Cancel();
+        _sseClient?.Dispose();
+        _shutdownCts?.Dispose();
+    }
     #endregion
 
     #region Private Methods
@@ -225,7 +233,7 @@ public class EventSubClient : IDisposable
             try
             {
                 Logger.Singleton?.Log(LogLevel.Info, $"Attempt {_reconnectionAttempts + 1}/{MaxReconnectionAttempts} to connect...");
-                await _sseClient!.ConnectAsync(_libraryInfo, _externalCallerInfo, cancellationToken);
+                await _sseClient!.ConnectAsync(cancellationToken);
 
                 _reconnectionAttempts = 0;
                 Logger.Singleton?.Log(LogLevel.Info, "Connection closed by server.");
@@ -308,23 +316,23 @@ public class EventSubClient : IDisposable
                 }
                 else if (message is EventMessage eventMsg)
                 {
-                    var handler = eventMsg.EventType switch
+                    var handler = eventMsg.Type switch
                     {
-                        EventType.DeleteMessage => OnMessageDeleted,
+                        EventType.Delete => OnMessageDeleted,
                         EventType.Pin => OnMessagePinned,
                         EventType.Unpin => OnMessageUnPinned,
                         EventType.Highlight => OnHighlightReceived,
-                        EventType.Redeem => OnRedemptionReceived,
+                        EventType.Redemption => OnRedemptionReceived,
                         EventType.Follow => OnFollowReceived,
                         EventType.Tip => OnTipReceived,
                         EventType.Subscription => OnSubscriptionReceived,
                         EventType.Shop => OnShopReceived,
-                        EventType.RaidStart => OnRaidStarted,
-                        EventType.RaidCancel => OnRaidCanceled,
+                        EventType.RaidStarted => OnRaidStarted,
+                        EventType.RaidCanceled => OnRaidCanceled,
                         EventType.RaidReceived => OnRaidReceived,
                         EventType.Shoutout => OnShoutoutReceived,
-                        EventType.ClearChat => OnClearChatReceived,
-                        EventType.SystemMessage => OnSystemMessageReceived,
+                        EventType.Clear => OnClearChatReceived,
+                        EventType.System => OnSystemMessageReceived,
                         _ => OnUnhandledReceived
                     };
 
@@ -351,13 +359,6 @@ public class EventSubClient : IDisposable
         {
             Logger.Singleton?.Log(LogLevel.Ping, "PING");
         };
-    }
-
-    public void Dispose()
-    {
-        _shutdownCts?.Cancel();
-        _sseClient?.Dispose();
-        _shutdownCts?.Dispose();
     }
     #endregion
 }

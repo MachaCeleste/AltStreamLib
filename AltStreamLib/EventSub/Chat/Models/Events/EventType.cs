@@ -2,20 +2,20 @@
 
 public enum EventType
 {
-    None,
+    Message,
     Pin,
     Unpin,
-    Redeem,
+    Redemption,
     Highlight,
     Follow,
     Tip,
     Subscription,
     Shop,
-    RaidStart,
-    RaidCancel,
     RaidReceived,
+    RaidStarted,
+    RaidCanceled,
     Shoutout,
-    ClearChat,
-    DeleteMessage,
-    SystemMessage
+    Clear,
+    Delete,
+    System
 }
