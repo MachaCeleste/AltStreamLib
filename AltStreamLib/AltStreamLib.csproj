@@ -5,9 +5,10 @@
     <LangVersion>13.0</LangVersion>
     <ImplicitUsings>disable</ImplicitUsings>
     <Title>AltStream Lib</Title>
-    <Version>0.3.13</Version>
+    <Version>0.4.0</Version>
     <Authors>Macha Celeste</Authors>
     <Company>Celestial Corp</Company>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -20,11 +21,12 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+    <PackageReference Include="System.Net.Http.Json" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\SseClientLib\SseClientLib\SseClientLib.csproj" />
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

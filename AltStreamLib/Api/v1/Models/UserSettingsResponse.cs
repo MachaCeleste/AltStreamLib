@@ -50,6 +50,12 @@ namespace AltStreamLib.Api.v1.Models
         [JsonProperty("isAltStreamSupporter")]
         public bool IsAltStreamSupporter { get; set; }
 
+        [JsonProperty("altStreamSupporterTier")]
+        public string AltStreamSupporterTier { get; set; }
+
+        [JsonProperty("supporterStickerBonus")]
+        public int SupporterStickerBonus { get; set; }
+
         [JsonProperty("isChannelSupporter")]
         public bool IsChannelSupporter { get; set; }
 
@@ -86,13 +92,80 @@ namespace AltStreamLib.Api.v1.Models
         [JsonProperty("channelPointsName")]
         public string ChannelPointsName { get; set; }
 
+        [JsonProperty("requireLoginToWatch")]
+        public bool RequireLoginToWatch { get; set; }
+    
+        [JsonProperty("allStreamsAdult")]
+        public bool AllStreamsAdult { get; set; }
+    
+        [JsonProperty("ageVerified")]
+        public bool AgeVerified { get; set; }
+    
+        [JsonProperty("ageVerifiedAt")]
+        public string AgeVerifiedAt { get; set; }
+    
+        [JsonProperty("ageVerificationProvider")]
+        public string AgeVerificationProvider { get; set; }
+    
+        [JsonProperty("discordUsername")]
+        public string DiscordUsername { get; set; }
+    
+        [JsonProperty("twitchUsername")]
+        public string TwitchUsername { get; set; }
+    
+        [JsonProperty("hasDiscordLinked")]
+        public bool HasDiscordLinked { get; set; }
+    
+        [JsonProperty("hasTwitchLinked")]
+        public bool HasTwitchLinked { get; set; }
+    
+        [JsonProperty("discordWebhookUrl")]
+        public string DiscordWebhookUrl { get; set; }
+    
+        [JsonProperty("discordWebhookMessage")]
+        public string DiscordWebhookMessage { get; set; }
+    
+        [JsonProperty("discordWebhookEnabled")]
+        public bool DiscordWebhookEnabled { get; set; }
+    
+        [JsonProperty("discordWebhookMention")]
+        public string DiscordWebhookMention { get; set; }
+    
+        [JsonProperty("discordWebhookRoleId")]
+        public string DiscordWebhookRoleId { get; set; }
+    
+        [JsonProperty("discordWebhookColor")]
+        public string DiscordWebhookColor { get; set; }
+    
+        [JsonProperty("discordWebhookThumbnail")]
+        public string DiscordWebhookThumbnail { get; set; }
+    
+        [JsonProperty("discordWebhookBanner")]
+        public string DiscordWebhookBanner { get; set; }
+    
+        [JsonProperty("kofiVerificationToken")]
+        public string KofiVerificationToken { get; set; }
+    
+        [JsonProperty("myReferralCode")]
+        public string MyReferralCode { get; set; }
+    
+        [JsonProperty("referredBy")]
+        public Referer ReferredBy { get; set; }
+
+
         public UserSettingsResponse(
             string name, string username, string image, string bio, string pronouns,
             string blueskyUrl, string websiteUrl, string discordUrl, string kofiUrl,
             string chatColor, List<GameInfo> gamingShelf, string offlineImage, string headerImage,
-            bool isSubscriber, bool isAltStreamSupporter, bool isChannelSupporter, string channelBadgeImage, 
-            string channelSupporterBadgeImage, bool isSiteAdmin, string followedAt, string bannedUntil, int userNumber,
-            string testerBadge, int referralCount, bool isReferralBadgeUnlocked, string channelPointsName)
+            bool isSubscriber, bool isAltStreamSupporter, string altStreamSupporterTier, int supporterStickerBonus,
+            bool isChannelSupporter, string channelBadgeImage, string channelSupporterBadgeImage, bool isSiteAdmin,
+            string followedAt, string bannedUntil, int userNumber, string testerBadge, int referralCount,
+            bool isReferralBadgeUnlocked, string channelPointsName, bool requireLoginToWatch,
+            bool allStreamsAdult, bool ageVerified, string ageVerifiedAt, string ageVerificationProvider,
+            string discordUsername, string twitchUsername, bool hasDiscordLinked, bool hasTwitchLinked,
+            string discordWebhookUrl, string discordWebhookMessage, bool discordWebhookEnabled, string discordWebhookMention,
+            string discordWebhookColor, string discordWebhookThumbnail, string discordWebhookBanner, string kofiVerificationToken,
+            string myReferralCode, Referer referredBy)
         {
             this.Name = name;
             this.Username = username;
@@ -109,6 +182,8 @@ namespace AltStreamLib.Api.v1.Models
             this.HeaderImage = headerImage;
             this.IsSubscriber = isSubscriber;
             this.IsAltStreamSupporter = isAltStreamSupporter;
+            this.AltStreamSupporterTier = altStreamSupporterTier;
+            this.SupporterStickerBonus = supporterStickerBonus;
             this.IsChannelSupporter = isChannelSupporter;
             this.ChannelBadgeImage = channelBadgeImage;
             this.ChannelSupporterBadgeImage = channelSupporterBadgeImage;
@@ -120,6 +195,25 @@ namespace AltStreamLib.Api.v1.Models
             this.ReferralCount = referralCount;
             this.IsReferralBadgeUnlocked = isReferralBadgeUnlocked;
             this.ChannelPointsName = channelPointsName;
+            this.RequireLoginToWatch = requireLoginToWatch;
+            this.AllStreamsAdult = allStreamsAdult;
+            this.AgeVerified = ageVerified;
+            this.AgeVerifiedAt = ageVerifiedAt;
+            this.AgeVerificationProvider = ageVerificationProvider;
+            this.DiscordUsername = discordUsername;
+            this.TwitchUsername = twitchUsername;
+            this.HasDiscordLinked = hasDiscordLinked;
+            this.HasTwitchLinked = hasTwitchLinked;
+            this.DiscordWebhookUrl = discordWebhookUrl;
+            this.DiscordWebhookMessage = discordWebhookMessage;
+            this.DiscordWebhookEnabled = discordWebhookEnabled;
+            this.DiscordWebhookMention = discordWebhookMention;
+            this.DiscordWebhookColor = discordWebhookColor;
+            this.DiscordWebhookThumbnail = discordWebhookThumbnail;
+            this.DiscordWebhookBanner = discordWebhookBanner;
+            this.KofiVerificationToken = kofiVerificationToken;
+            this.MyReferralCode = myReferralCode;
+            this.ReferredBy = referredBy;
         }
 
         public UserSettingsResponse() { }

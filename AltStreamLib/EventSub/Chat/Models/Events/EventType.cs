@@ -1,22 +1,21 @@
-﻿namespace AltStreamLib.EventSub.Chat.Models.Events
+﻿namespace AltStreamLib.EventSub.Chat.Models.Events;
+
+public enum EventType
 {
-    public enum EventType
-    {
-        None,
-        Pin,
-        Unpin,
-        Redeem,
-        Highlight,
-        Follow,
-        Tip,
-        Subscription,
-        Shop,
-        RaidStart,
-        RaidCancel,
-        RaidReceived,
-        Shoutout,
-        ClearChat,
-        DeleteMessage,
-        SystemMessage
-    }
+    Message,
+    Pin,
+    Unpin,
+    Redemption,
+    Highlight,
+    Follow,
+    Tip,
+    Subscription,
+    Shop,
+    RaidReceived,
+    RaidStarted,
+    RaidCanceled,
+    Shoutout,
+    Clear,
+    Delete,
+    System
 }
