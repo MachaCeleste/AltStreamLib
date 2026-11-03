@@ -6,6 +6,7 @@ using AltStreamLib.EventSub.Chat.Models;
 using AltStreamLib.Logging;
 using AltStreamLib.Utils;
 using AltStreamLib.EventSub.Chat.Models.Events;
+using AltStreamLib.Api;
 
 namespace AltStreamLib.EventSub;
 
@@ -132,7 +133,8 @@ public class EventSubClient : IDisposable
     /// EventSubClient using SSEClient to connect to chat endpoint (read only)
     /// </summary>
     /// <param name="channelName">Channel to connect with</param>
-    public EventSubClient(string channelName, string? cookieJson = null)
+    /// <param name="cookiesJson">A json string of your cookies to load. (Only required in <see cref="ApiClient"/> OR <see cref="EventSubClient"/>)</param>
+    public EventSubClient(string channelName, string? cookiesJson = null)
     {
         if (string.IsNullOrEmpty(channelName))
         {
@@ -147,7 +149,7 @@ public class EventSubClient : IDisposable
         {
             Assembly? assembly = Assembly.GetCallingAssembly();
             var externalCallerInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
-            new HttpManager(externalCallerInfo, cookieJson);
+            new HttpManager(externalCallerInfo, cookiesJson);
         }
 
         if (HttpManager.Singleton is null)
