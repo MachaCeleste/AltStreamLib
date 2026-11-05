@@ -4,10 +4,9 @@ using System.Reflection;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using SseClientLib;
-using AltStreamLib.EventSub.Chat;
 using AltStreamLib.EventSub.Chat.Models;
-using AltStreamLib.EventSub.Chat.Models.Events;
 using AltStreamLib.Logging;
 using AltStreamLib.Utils;
 
@@ -44,91 +43,94 @@ namespace AltStreamLib.EventSub
         /// <summary>
         /// Called when a Message is received
         /// </summary>
-        public event Action<Message> OnMessageReceived;
+        public event Action<Data> OnMessageReceived;
+
+        /// <summary>
+        /// Called when a Reply is received
+        /// </summary>
+        public event Action<Data> OnReplyReceived;
+
 
         /// <summary>
         /// Called when a MessageDeleted event is received
         /// </summary>
-        public event Action<EventMessage> OnMessageDeleted;
+        public event Action<Data> OnMessageDeleted;
 
         /// <summary>
         /// Called when a MessagePinned event is received
         /// </summary>
-        public event Action<EventMessage> OnMessagePinned;
+        public event Action<Data> OnMessagePinned;
 
         /// <summary>
         /// Called when a MessageUnpinned event is received
         /// </summary>
-        public event Action<EventMessage> OnMessageUnPinned;
+        public event Action<Data> OnMessageUnPinned;
 
         /// <summary>
         /// Called when a HighlightMessage event is received
         /// </summary>
-        public event Action<EventMessage> OnHighlightReceived;
+        public event Action<Data> OnHighlightReceived;
 
         /// <summary>
         /// Called when a Redemption event is received
         /// </summary>
-        public event Action<EventMessage> OnRedemptionReceived;
+        public event Action<Data> OnRedemptionReceived;
 
         /// <summary>
         /// Called when a Follow event is received
         /// </summary>
-        [Obsolete("OnFollowReseived is preserved as a possible future function but may not currently be used!")]
-        public event Action<EventMessage> OnFollowReceived;
+        //public event Action<Data> OnFollowReceived;
 
         /// <summary>
         /// Called when a KoFiTip event is received
         /// </summary>
-        [Obsolete("OnTipReceived is preserved as a possible future function but may not currently be used!")]
-        public event Action<EventMessage> OnTipReceived;
+        public event Action<Data> OnTipReceived;
 
         /// <summary>
         /// Called when a KoFiSubscription event is received
         /// </summary>
-        [Obsolete("OnSubscriptionReceived is preserved as a possible future function but may not currently be used!")]
-        public event Action<EventMessage> OnSubscriptionReceived;
+        public event Action<Data> OnSubscriptionReceived;
 
         /// <summary>
         /// Called when a KoFiShop event is received
         /// </summary>
-        [Obsolete("OnShopReceived is preserved as a possible future function but may not currently be used!")]
-        public event Action<EventMessage> OnShopReceived;
+        public event Action<Data> OnShopReceived;
 
         /// <summary>
         /// Called when a RaidStart event is received
         /// </summary>
-        public event Action<EventMessage> OnRaidStarted;
+        //public event Action<Data> OnRaidStarted;
 
         /// <summary>
         /// Called when a RaidCanceled event is received
         /// </summary>
-        public event Action<EventMessage> OnRaidCanceled;
+        //public event Action<Data> OnRaidCanceled;
 
         /// <summary>
         /// Called when a Raid event is received
+        /// <para>Will fire when not authed as streamer or moderator but will not show data</para>
         /// </summary>
-        public event Action<EventMessage> OnRaidReceived;
+        public event Action<Data> OnRaidReceived;
 
         /// <summary>
         /// Called when a Shoutout event is received
         /// </summary>
-        public event Action<EventMessage> OnShoutoutReceived;
+        public event Action<Data> OnShoutoutReceived;
 
         /// <summary>
         /// Called when a ClearChat event is received
         /// </summary>
-        public event Action<EventMessage> OnClearChatReceived;
+        public event Action<Data> OnClearChatReceived;
 
         /// <summary>
         /// Called when a SystemMessage event is received
         /// </summary>
-        public event Action<EventMessage> OnSystemMessageReceived;
+        public event Action<Data> OnSystemMessageReceived;
 
         /// <summary>
         /// Called when an event is received that doesnt fit any event model
         /// </summary>
-        public event Action<EventMessage> OnUnhandledReceived;
+        public event Action<Data> OnUnhandledReceived;
         #endregion
 
         #region Public Methods
@@ -136,8 +138,9 @@ namespace AltStreamLib.EventSub
         /// EventSubClient using SSEClient to connect to chat endpoint (read only)
         /// </summary>
         /// <param name="channelName">Channel to connect with</param>
+        /// <param name="botToken">Your bots token</param>
         /// <param name="cookiesJson">A json string of your cookies to load. (Only required in <see cref="ApiClient"/> OR <see cref="EventSubClient"/>)</param>
-        public EventSubClient(string channelName, string cookiesJson = null)
+        public EventSubClient(string channelName, string botToken, string cookiesJson = null)
         {
             if (string.IsNullOrEmpty(channelName))
             {
@@ -152,7 +155,7 @@ namespace AltStreamLib.EventSub
             {
                 Assembly assembly = Assembly.GetCallingAssembly();
                 var externalCallerInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
-                new HttpManager(externalCallerInfo, cookiesJson);
+                new HttpManager(externalCallerInfo, botToken, cookiesJson);
             }
 
             if (HttpManager.Singleton is null)
@@ -162,7 +165,7 @@ namespace AltStreamLib.EventSub
                 throw ex;
             }
 
-            _sseClient = new SseClient("chat/stream", $"channel={channelName}", HttpManager.Singleton.Client, TimeSpan.FromSeconds(45));
+            _sseClient = new SseClient("v2/chat/stream", $"channel={channelName}", HttpManager.Singleton.Client, TimeSpan.FromSeconds(45));
 
             SubscribeSseClientEvents();
         }
@@ -311,72 +314,69 @@ namespace AltStreamLib.EventSub
             {
                 try
                 {
-                    if (!ChatHandler.TryDeserializeChatPayload(payload, out var message) || message is null)
-                        return;
+                    Data data = JsonConvert.DeserializeObject<Data>(payload)
+                        ?? throw new NullReferenceException("Packet data is null");
 
-                    if (message is Message msg)
+                    Action<Data> handler;
+                    switch (data.Type)
                     {
-                        OnMessageReceived?.Invoke(msg);
-                        return;
+                        case MessageType.Reply:
+                            handler = OnReplyReceived;
+                            break;
+                        case MessageType.Message:
+                            handler = OnMessageReceived;
+                            break;
+                        case MessageType.Delete:
+                            handler = OnMessageDeleted;
+                            break;
+                        case MessageType.Pin:
+                            handler = OnMessagePinned;
+                            break;
+                        case MessageType.Unpin:
+                            handler = OnMessageUnPinned;
+                            break;
+                        case MessageType.Highlight:
+                            handler = OnHighlightReceived;
+                            break;
+                        case MessageType.Redemption:
+                            handler = OnRedemptionReceived;
+                            break;
+                        //case MessageType.Follow:
+                        //    handler = OnFollowReceived;
+                        //    break;
+                        case MessageType.Tip:
+                            handler = OnTipReceived;
+                            break;
+                        case MessageType.Subscription:
+                            handler = OnSubscriptionReceived;
+                            break;
+                        case MessageType.Shop:
+                            handler = OnShopReceived;
+                            break;
+                        //case MessageType.RaidStarted:
+                        //    handler = OnRaidStarted;
+                        //    break;
+                        //case MessageType.RaidCanceled:
+                        //    handler = OnRaidCanceled;
+                        //    break;
+                        case MessageType.RaidReceived:
+                            handler = OnRaidReceived;
+                            break;
+                        case MessageType.Shoutout:
+                            handler = OnShoutoutReceived;
+                            break;
+                        case MessageType.Clear:
+                            handler = OnClearChatReceived;
+                            break;
+                        case MessageType.System:
+                            handler = OnSystemMessageReceived;
+                            break;
+                        default:
+                            handler = OnUnhandledReceived;
+                            break;
                     }
-                    else if (message is EventMessage eventMsg)
-                    {
-                        Action<EventMessage> handler;
 
-                        switch (eventMsg.Type)
-                        {
-                            case EventType.Delete:
-                                handler = OnMessageDeleted;
-                                break;
-                            case EventType.Pin:
-                                handler = OnMessagePinned;
-                                break;
-                            case EventType.Unpin:
-                                handler = OnMessageUnPinned;
-                                break;
-                            case EventType.Highlight:
-                                handler = OnHighlightReceived;
-                                break;
-                            case EventType.Redemption:
-                                handler = OnRedemptionReceived;
-                                break;
-                            case EventType.Follow:
-                                handler = OnFollowReceived;
-                                break;
-                            case EventType.Tip:
-                                handler = OnTipReceived;
-                                break;
-                            case EventType.Subscription:
-                                handler = OnSubscriptionReceived;
-                                break;
-                            case EventType.Shop:
-                                handler = OnShopReceived;
-                                break;
-                            case EventType.RaidStarted:
-                                handler = OnRaidStarted;
-                                break;
-                            case EventType.RaidCanceled:
-                                handler = OnRaidCanceled;
-                                break;
-                            case EventType.RaidReceived:
-                                handler = OnRaidReceived;
-                                break;
-                            case EventType.Shoutout:
-                                handler = OnShoutoutReceived;
-                                break;
-                            case EventType.Clear:
-                                handler = OnClearChatReceived;
-                                break;
-                            case EventType.System:
-                                handler = OnSystemMessageReceived;
-                                break;
-                            default:
-                                handler = OnUnhandledReceived;
-                                break;
-                        }
-
-                        handler?.Invoke(eventMsg);
-                    }
+                    handler?.Invoke(data);
                 }
                 catch (Exception ex)
                 {

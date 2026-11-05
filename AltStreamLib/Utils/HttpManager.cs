@@ -1,12 +1,13 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Reflection;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using AltStreamLib.Logging;
 
 namespace AltStreamLib.Utils;
@@ -18,9 +19,9 @@ internal class HttpManager
     internal HttpClient? Client;
     private CookieContainer _cookieContainer = new CookieContainer();
 
-    internal HttpManager(FileVersionInfo callingInfo, string? cookiesJson = null)
+    internal HttpManager(FileVersionInfo callingInfo, string botToken, string? cookiesJson = null)
     {
-        if (Singleton is not null) return;
+        if (Singleton is not null || string.IsNullOrWhiteSpace(botToken)) return;
 
         if (!string.IsNullOrEmpty(cookiesJson))
             LoadCookieContainerAsync(cookiesJson);
@@ -34,6 +35,9 @@ internal class HttpManager
         {
             BaseAddress = new Uri("https://altstream.online/api/")
         };
+
+        Client.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", botToken);
 
         Assembly? libAssembly = Assembly.GetExecutingAssembly();
         var libraryInfo = FileVersionInfo.GetVersionInfo(libAssembly.Location);
@@ -73,7 +77,7 @@ internal class HttpManager
         return json;
     }
 
-    internal async Task<T?> SendRequestAsync<T>(string endpoint)
+    internal async Task<T> SendRequestAsync<T>(string endpoint)
     {
         try
         {
@@ -91,7 +95,7 @@ internal class HttpManager
         }
     }
 
-    internal async Task<TResponse?> SendPutRequestAsync<TRequest, TResponse>(string endpoint, TRequest payload)
+    internal async Task<TResponse> SendPutRequestAsync<TRequest, TResponse>(string endpoint, TRequest payload)
     {
         try
         {
@@ -133,7 +137,7 @@ internal class HttpManager
         }
     }
 
-    internal async Task<TResponse?> SendPostRequestAsync<TRequest, TResponse>(string endpoint, TRequest payload)
+    internal async Task<TResponse> SendPostRequestAsync<TRequest, TResponse>(string endpoint, TRequest payload)
     {
         try
         {
@@ -154,7 +158,7 @@ internal class HttpManager
         }
     }
 
-    internal async Task<TResponse?> SendPatchRequestAsync<TRequest, TResponse>(string endpoint, TRequest payload)
+    internal async Task<TResponse> SendPatchRequestAsync<TRequest, TResponse>(string endpoint, TRequest payload)
     {
         try
         {
