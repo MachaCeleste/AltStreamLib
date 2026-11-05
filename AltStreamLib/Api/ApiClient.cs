@@ -256,11 +256,11 @@ namespace AltStreamLib.Api
         /// </summary>
         /// <param name="content"></param>
         /// <returns><see cref="RequestResponse"/> or null</returns>
-        public async Task<RequestResponse> SendChatMessageAsync(string content)
+        public async Task<RequestResponse> SendChatMessageAsync(string content, string replyToId = null)
         {
             if (Session is not null && HttpManager.Singleton is not null)
             {
-                var message = new PostChatRequest(Session.User.Name, content);
+                var message = new PostChatRequest(Session.User.Name, content, replyToId);
                 return await HttpManager.Singleton.SendPostRequestAsync<PostChatRequest, RequestResponse>("chat", message);
             }
             return null;

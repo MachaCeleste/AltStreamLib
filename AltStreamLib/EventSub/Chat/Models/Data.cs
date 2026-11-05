@@ -57,26 +57,27 @@ namespace AltStreamLib.EventSub.Chat.Models
 
         public Data() { }
     }
-}
 
-[JsonConverter(typeof(StringEnumConverter))]
-public enum MessageType
-{
-    [EnumMember(Value = "message")] Message,
-    [EnumMember(Value = "reply")] Reply,
-    [EnumMember(Value = "pin")] Pin,
-    [EnumMember(Value = "unpin")] Unpin,
-    [EnumMember(Value = "redemption")] Redemption,
-    [EnumMember(Value = "highlight")] Highlight,
-    [EnumMember(Value = "follow")] Follow,
-    [EnumMember(Value = "tip")] Tip,
-    [EnumMember(Value = "subscription")] Subscription,
-    [EnumMember(Value = "shop")] Shop,
-    [EnumMember(Value = "raid_received")] RaidReceived,
-    //[EnumMember(Value = "raid_started")] RaidStarted,
-    //[EnumMember(Value = "raid_canceled")] RaidCanceled,
-    [EnumMember(Value = "shoutout")] Shoutout,
-    [EnumMember(Value = "clear")] Clear,
-    [EnumMember(Value = "delete")] Delete,
-    [EnumMember(Value = "system")] System
+
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum MessageType
+    {
+        [EnumMember(Value = "message")] Message,
+        [EnumMember(Value = "reply")] Reply,
+        [EnumMember(Value = "pin")] Pin,
+        [EnumMember(Value = "unpin")] Unpin,
+        [EnumMember(Value = "redemption")] Redemption,
+        [EnumMember(Value = "highlight")] Highlight,
+        [EnumMember(Value = "follow")] Follow,
+        [EnumMember(Value = "tip")] Tip,
+        [EnumMember(Value = "subscription")] Subscription,
+        [EnumMember(Value = "shop")] Shop,
+        [EnumMember(Value = "raid_received")] RaidReceived,
+        //[EnumMember(Value = "raid_started")] RaidStarted,
+        //[EnumMember(Value = "raid_canceled")] RaidCanceled,
+        [EnumMember(Value = "shoutout")] Shoutout,
+        [EnumMember(Value = "clear")] Clear,
+        [EnumMember(Value = "delete")] Delete,
+        [EnumMember(Value = "system")] System
+    }
 }
