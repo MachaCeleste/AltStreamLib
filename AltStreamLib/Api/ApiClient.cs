@@ -23,14 +23,15 @@ namespace AltStreamLib.Api
         /// Initialize new API Client.
         /// <para>Rate limit is 60 Requests/minute.</para>
         /// </summary>
+        /// <param name="botToken">Your bots token</param>
         /// <param name="cookiesJson">A json string of your cookies to load. (Only required in <see cref="ApiClient"/> OR <see cref="EventSubClient"/>)</param>
-        public ApiClient(string? cookiesJson = null)
+        public ApiClient(string botToken, string? cookiesJson = null)
         {
             if (HttpManager.Singleton is null)
             {
                 Assembly? assembly = Assembly.GetCallingAssembly();
                 var externalCallerInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
-                new HttpManager(externalCallerInfo, cookiesJson);
+                new HttpManager(externalCallerInfo, botToken, cookiesJson);
             }
         }
 
@@ -245,24 +246,19 @@ namespace AltStreamLib.Api
 
         #region POST
         /// <summary>
-        /// Send chat <paramref name="content"/> in <paramref name="channel"/><br/>
+        /// Send chat <paramref name="content"/> in streamers channel<br/>
         /// Can reply by setting <paramref name="replyToId"/> to messageId.<br/>
         /// 
         /// <para>Requires Auth</para>
         /// </summary>
-        /// <param name="channel"></param>
         /// <param name="content"></param>
-        /// <param name="replyToId"></param>
-        /// <param name="replyToAuthor"></param>
         /// <returns><see cref="RequestResponse"/> or null</returns>
-        public async Task<RequestResponse?> SendChatMessageAsync(string channel, string content, string? replyToId = null, string? replyToAuthor = null)
+        public async Task<RequestResponse?> SendChatMessageAsync(string content)
         {
             if (Session is not null && HttpManager.Singleton is not null)
             {
-                var id = (int)Math.Floor(1E8 + 9E8 * new Random().NextDouble());
-                var message = new ChatMessagePostRequest(id.ToString(), channel,
-                    Session.User.Name, $"[🤖] {content}", replyToId, replyToAuthor);
-                return await HttpManager.Singleton.SendPostRequestAsync<ChatMessagePostRequest, RequestResponse>("chat", message);
+                var message = new PostChatRequest(Session.User.Username, content);
+                return await HttpManager.Singleton.SendPostRequestAsync<PostChatRequest, RequestResponse>("v2/chat", message);
             }
             return null;
         }

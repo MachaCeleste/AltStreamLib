@@ -1,8 +1,9 @@
 ﻿using System.Net;
+using System.Net.Http.Json;
+using System.Net.Http.Headers;
+using System.Text.Json;
 using System.Reflection;
 using System.Diagnostics;
-using System.Text.Json;
-using System.Net.Http.Json;
 using AltStreamLib.Logging;
 
 namespace AltStreamLib.Utils;
@@ -14,9 +15,9 @@ internal class HttpManager
     internal HttpClient? Client;
     private CookieContainer _cookieContainer = new CookieContainer();
 
-    internal HttpManager(FileVersionInfo callingInfo, string? cookiesJson = null)
+    internal HttpManager(FileVersionInfo callingInfo, string botToken, string? cookiesJson = null)
     {
-        if (Singleton is not null) return;
+        if (Singleton is not null || string.IsNullOrWhiteSpace(botToken)) return;
 
         if (!string.IsNullOrEmpty(cookiesJson))
             LoadCookieContainerAsync(cookiesJson);
@@ -30,6 +31,9 @@ internal class HttpManager
         {
             BaseAddress = new Uri("https://altstream.online/api/")
         };
+
+        Client.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", botToken);
 
         Assembly? libAssembly = Assembly.GetExecutingAssembly();
         var libraryInfo = FileVersionInfo.GetVersionInfo(libAssembly.Location);
