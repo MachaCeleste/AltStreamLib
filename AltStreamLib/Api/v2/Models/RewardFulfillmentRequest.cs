@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace AltStreamLib.Api.Rewards.Models
+namespace AltStreamLib.Api.v2.Models
 {
     public class RewardFulfillmentRequest
     {

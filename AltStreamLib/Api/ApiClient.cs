@@ -1,18 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Reflection;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using AltStreamLib.Api.Models;
 using AltStreamLib.Api.v1.Models;
 using AltStreamLib.Api.Chat.Models;
-using AltStreamLib.Api.Admin.Models;
+using AltStreamLib.Api.Auth.Models;
 using AltStreamLib.Api.Rewards.Models;
 using AltStreamLib.Api.Shoutout.Models;
 using AltStreamLib.Api.Live.Models;
-using AltStreamLib.Api.Auth.Models;
+using AltStreamLib.Api.Admin.Models;
 using AltStreamLib.EventSub;
 using AltStreamLib.Utils;
+using AltStreamLib.Api.v2.Models;
 
 namespace AltStreamLib.Api
 {
@@ -80,9 +81,9 @@ namespace AltStreamLib.Api
         {
             if (HttpManager.Singleton is not null)
             {
-                var res = await HttpManager.Singleton.SendRequestAsync<ApiResponse<RewardsResponse>>($"rewards?channel={channelName}&includeDisabled=true");
+                var res = await HttpManager.Singleton.SendRequestAsync<RewardsResponse>($"rewards?channel={channelName}&includeDisabled=true");
                 if (res != null)
-                    return res.Data;
+                    return res;
             }
             return null;
         }
@@ -186,7 +187,7 @@ namespace AltStreamLib.Api
         public async Task<List<UpdateGameRequest>> GetGameSearchAsync(string query)
         {
             if (_streamKey is null || !_streamKey.HasStreamKey || HttpManager.Singleton is null) return null;
-            return await HttpManager.Singleton.SendRequestAsync<List<UpdateGameRequest>>($"live/game/search={query}&key={_streamKey}");
+            return await HttpManager.Singleton.SendRequestAsync<List<UpdateGameRequest>>($"live/game/search?q={query}&key={_streamKey}");
         }
         #endregion
 
@@ -258,10 +259,10 @@ namespace AltStreamLib.Api
         /// <returns><see cref="RequestResponse"/> or null</returns>
         public async Task<RequestResponse> SendChatMessageAsync(string content, string replyToId = null)
         {
-            if (Session is not null && HttpManager.Singleton is not null)
+            if (HttpManager.Singleton is not null)
             {
-                var message = new PostChatRequest(Session.User.Name, content, replyToId);
-                return await HttpManager.Singleton.SendPostRequestAsync<PostChatRequest, RequestResponse>("chat", message);
+                var message = new PostChatRequest(Session.User.Username, content, replyToId);
+                return await HttpManager.Singleton.SendPostRequestAsync<PostChatRequest, RequestResponse>("v2/chat", message);
             }
             return null;
         }
@@ -372,7 +373,7 @@ namespace AltStreamLib.Api
             if (Session is not null && HttpManager.Singleton is not null)
             {
                 var rewardState = new RewardFulfillmentRequest(redemptionId, Session.User.Username, state.ToString().ToLower());
-                return await HttpManager.Singleton.SendPatchRequestAsync<RewardFulfillmentRequest, RequestResponse>("rewards/redemptions", rewardState);
+                return await HttpManager.Singleton.SendPatchRequestAsync<RewardFulfillmentRequest, RequestResponse>("v2/rewards/redemptions", rewardState);
             }
             return null;
         }
