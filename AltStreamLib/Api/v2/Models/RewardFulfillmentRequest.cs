@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace AltStreamLib.Api.Rewards.Models;
+namespace AltStreamLib.Api.v2.Models;
 
 public record RewardFulfillmentRequest(
     [property: JsonPropertyName("id")] int Id,

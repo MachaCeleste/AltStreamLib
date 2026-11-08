@@ -10,6 +10,7 @@ using AltStreamLib.Api.Live.Models;
 using AltStreamLib.Api.Admin.Models;
 using AltStreamLib.EventSub;
 using AltStreamLib.Utils;
+using AltStreamLib.Api.v2.Models;
 
 namespace AltStreamLib.Api
 {
@@ -183,7 +184,7 @@ namespace AltStreamLib.Api
         public async Task<List<UpdateGameRequest>?> GetGameSearchAsync(string query)
         {
             if (_streamKey is null || !_streamKey.HasStreamKey || HttpManager.Singleton is null) return null;
-            return await HttpManager.Singleton.SendRequestAsync<List<UpdateGameRequest>>($"live/game/search?={query}&key={_streamKey}");
+            return await HttpManager.Singleton.SendRequestAsync<List<UpdateGameRequest>>($"live/game/search?q={query}&key={_streamKey}");
         }
         #endregion
 
@@ -369,7 +370,7 @@ namespace AltStreamLib.Api
             if (Session is not null && HttpManager.Singleton is not null)
             {
                 var rewardState = new RewardFulfillmentRequest(redemptionId, Session.User.Username, state.ToString().ToLower());
-                return await HttpManager.Singleton.SendPatchRequestAsync<RewardFulfillmentRequest, RequestResponse>("rewards/redemptions", rewardState);
+                return await HttpManager.Singleton.SendPatchRequestAsync<RewardFulfillmentRequest, RequestResponse>("v2/rewards/redemptions", rewardState);
             }
             return null;
         }
