@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using AltStreamLib.Api.Models;
 using AltStreamLib.Api.v1.Models;
+using AltStreamLib.Api.v2.Models;
 using AltStreamLib.Api.Chat.Models;
 using AltStreamLib.Api.Auth.Models;
 using AltStreamLib.Api.Rewards.Models;
@@ -13,7 +14,6 @@ using AltStreamLib.Api.Live.Models;
 using AltStreamLib.Api.Admin.Models;
 using AltStreamLib.EventSub;
 using AltStreamLib.Utils;
-using AltStreamLib.Api.v2.Models;
 
 namespace AltStreamLib.Api
 {
@@ -180,7 +180,7 @@ namespace AltStreamLib.Api
 
         /// <summary>
         /// Search for games or catagories by <paramref name="query"/>.
-        /// <para>Requires Auth</para>
+        /// <para>Requires Auth and Stream Key</para>
         /// </summary>
         /// <param name="query">Search Query</param>
         /// <returns>Returns List of <see cref="UpdateGameRequest"/></returns>
@@ -224,7 +224,7 @@ namespace AltStreamLib.Api
         /// <summary>
         /// Set the current game.<br/>
         /// Can get game info from <seealso cref="GetGameSearchAsync(string)"/>.
-        /// <para>Requires Auth</para>
+        /// <para>Requires Auth and Stream Key</para>
         /// </summary>
         /// <param name="id"></param>
         /// <param name="igdbId"></param>
@@ -253,30 +253,30 @@ namespace AltStreamLib.Api
         /// Send chat <paramref name="content"/> in streamers channel<br/>
         /// Can reply by setting <paramref name="replyToId"/> to messageId.<br/>
         /// 
-        /// <para>Requires Auth</para>
         /// </summary>
+        /// <param name="channelName"></param>
         /// <param name="content"></param>
+        /// <param name="replyToId"></param>
         /// <returns><see cref="RequestResponse"/> or null</returns>
-        public async Task<RequestResponse> SendChatMessageAsync(string content, string replyToId = null)
+        public async Task<RequestResponse> SendChatMessageAsync(string channelName, string content, string replyToId = null)
         {
             if (HttpManager.Singleton is not null)
             {
-                var message = new PostChatRequest(Session.User.Username, content, replyToId);
+                var message = new PostChatRequest(channelName, content, replyToId);
                 return await HttpManager.Singleton.SendPostRequestAsync<PostChatRequest, RequestResponse>("v2/chat", message);
             }
             return null;
         }
 
         /// <summary>
-        /// Send a shoutout in given <paramref name="channel"/> for <paramref name="target"/> .
-        /// <para>Requires Auth</para>
+        /// Send a shoutout in given <paramref name="channel"/> for <paramref name="target"/>.
         /// </summary>
         /// <param name="channel"></param>
         /// <param name="target"></param>
         /// <returns><see cref="RequestResponse"/> or null</returns>
         public async Task<RequestResponse> SendShoutoutAsync(string channel, string target)
         {
-            if (Session is not null && HttpManager.Singleton is not null)
+            if (HttpManager.Singleton is not null)
             {
                 var shoutout = new ShoutoutRequest(channel, target);
                 return await HttpManager.Singleton.SendPostRequestAsync<ShoutoutRequest, RequestResponse>("shoutout", shoutout);
@@ -312,7 +312,7 @@ namespace AltStreamLib.Api
 
         /// <summary>
         /// Change the stream <paramref name="title"/>.
-        /// <para>Requires Auth</para>
+        /// <para>Requires Auth and Stream Key</para>
         /// </summary>
         /// <param name="title"></param>
         /// <returns>False if unsuccessful</returns>
@@ -363,16 +363,16 @@ namespace AltStreamLib.Api
 
         /// <summary>
         /// Set the fulfillment <paramref name="state"/> of a given <paramref name="redemptionId"/>.
-        /// <para>Requires Auth</para>
         /// </summary>
+        /// <param name="channelName"></param>
         /// <param name="redemptionId"></param>
         /// <param name="state"></param>
         /// <returns><see cref="RequestResponse"/> or null</returns>
-        public async Task<RequestResponse> SetRewardFulfillmentAsync(int redemptionId, Fulfillment state)
+        public async Task<RequestResponse> SetRewardFulfillmentAsync(string channelName, int redemptionId, Fulfillment state)
         {
-            if (Session is not null && HttpManager.Singleton is not null)
+            if (HttpManager.Singleton is not null)
             {
-                var rewardState = new RewardFulfillmentRequest(redemptionId, Session.User.Username, state.ToString().ToLower());
+                var rewardState = new RewardFulfillmentRequest(redemptionId, channelName, state.ToString().ToLower());
                 return await HttpManager.Singleton.SendPatchRequestAsync<RewardFulfillmentRequest, RequestResponse>("v2/rewards/redemptions", rewardState);
             }
             return null;
@@ -426,6 +426,7 @@ namespace AltStreamLib.Api
         public void Dispose()
         {
             Session = null;
+            _streamKey = null;
         }
     }
 }

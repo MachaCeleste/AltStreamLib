@@ -7,8 +7,8 @@ namespace AltStreamLib.EventSub.Chat.Models
         [JsonProperty("id")]
         public string Id { get; set; }
     
-        [JsonProperty("display")]
-        public string Display { get; set; }
+        [JsonProperty("displayName")]
+        public string DisplayName { get; set; }
     
         [JsonProperty("channelName")]
         public string ChannelName { get; set; }
@@ -28,11 +28,11 @@ namespace AltStreamLib.EventSub.Chat.Models
         [JsonProperty("badges")]
         public string[] Badges { get; set; }
 
-        public Author(string id, string display, string channelName, string pronouns,
+        public Author(string id, string displayName, string channelName, string pronouns,
             string image, string color, Roles roles, string[] badges)
         {
             this.Id = id;
-            this.Display = display;
+            this.DisplayName = displayName;
             this.ChannelName = channelName;
             this.Pronouns = pronouns;
             this.Image = image;
