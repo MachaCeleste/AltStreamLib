@@ -2,7 +2,7 @@
 
 namespace AltStreamLib.Api.Admin.Models
 {
-    public class User
+    public class ChatUser
     {
         [JsonProperty("id")]
         public string Id { get; set; }
@@ -28,7 +28,7 @@ namespace AltStreamLib.Api.Admin.Models
         [JsonProperty("joinedAt")]
         public string JoinedAt { get; set; }
 
-        public User(string id, string name, string type, string image, string country, string countryCode, string flag, string joinedAt)
+        public ChatUser(string id, string name, string type, string image, string country, string countryCode, string flag, string joinedAt)
         {
             this.Id = id;
             this.Name = name;
@@ -40,6 +40,6 @@ namespace AltStreamLib.Api.Admin.Models
             this.JoinedAt = joinedAt;
         }
 
-        public User() { }
+        public ChatUser() { }
     }
 }

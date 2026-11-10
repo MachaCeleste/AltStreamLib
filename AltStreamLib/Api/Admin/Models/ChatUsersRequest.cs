@@ -6,6 +6,6 @@ namespace AltStreamLib.Api.Admin.Models
     public class ChatUsersRequest
     {
         [JsonProperty("users")]
-        public List<User> Users { get; set; }
+        public List<ChatUser> Users { get; set; }
     }
 }

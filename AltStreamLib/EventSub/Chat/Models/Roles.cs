@@ -15,16 +15,20 @@ namespace AltStreamLib.EventSub.Chat.Models
     
         [JsonProperty("altstreamSubscriber")]
         public bool AltstreamSubscriber { get; set; }
-    
+
+        [JsonProperty("follower")]
+        public bool Follower { get; set; }
+
         [JsonProperty("isBot")]
         public bool IsBot { get; set; }
 
-        public Roles(bool broadcaster, bool moderator, bool channelSubscriber, bool altstreamSubscriber, bool isBot)
+        public Roles(bool broadcaster, bool moderator, bool channelSubscriber, bool altstreamSubscriber, bool follower, bool isBot)
         {
             this.Broadcaster = broadcaster;
             this.Moderator = moderator;
             this.ChannelSubscriber = channelSubscriber;
             this.AltstreamSubscriber = altstreamSubscriber;
+            this.Follower = follower;
             this.IsBot = isBot;
         }
 

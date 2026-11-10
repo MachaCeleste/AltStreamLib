@@ -132,6 +132,17 @@ namespace AltStreamLib.Api
         }
 
         /// <summary>
+        /// Get <see cref="User"/> info for given <paramref name="channelName"/>
+        /// </summary>
+        /// <param name="channelName"></param>
+        /// <returns><see cref="User"/> or null</returns>
+        public async Task<User> GetUserInfoAsync(string channelName)
+        {
+            if (HttpManager.Singleton is null) return null;
+            return await HttpManager.Singleton.SendRequestAsync<User>($"v2/users/{channelName}");
+        }
+
+        /// <summary>
         /// Get <see cref="ModResponse"/> for given <paramref name="channelName"/>.
         /// </summary>
         /// <param name="channelName"></param>
