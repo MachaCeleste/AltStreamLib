@@ -12,11 +12,15 @@ public record UserSettingsResponse(
     [property: JsonPropertyName("websiteUrl")] string? WebsiteUrl,
     [property: JsonPropertyName("discordUrl")] string? DiscordUrl,
     [property: JsonPropertyName("kofiUrl")] string? KofiUrl,
+    [property: JsonPropertyName("bmacUrl")] string? BmacUrl,
+    [property: JsonPropertyName("featuredSupportProvider")] string? FeaturedSupportProvider,
+    [property: JsonPropertyName("vgenUrl")] string? VgenUrl,
     [property: JsonPropertyName("chatColor")] string? ChatColor,
     [property: JsonPropertyName("gamingShelf")] List<GameInfo> GamingShelf,
     [property: JsonPropertyName("offlineImage")] string? OfflineImage,
     [property: JsonPropertyName("headerImage")] string? HeaderImage,
     [property: JsonPropertyName("isSubscriber")] bool IsSubscriber,
+    [property: JsonPropertyName("isChannelSubscriber")] bool IsChannelSubscriber,
     [property: JsonPropertyName("isAltStreamSupporter")] bool IsAltStreamSupporter,
     [property: JsonPropertyName("altStreamSupporterTier")] string? AltStreamSupporterTier,
     [property: JsonPropertyName("supporterStickerBonus")] int? SupporterStickerBonus,
@@ -50,6 +54,7 @@ public record UserSettingsResponse(
     [property: JsonPropertyName("discordWebhookThumbnail")] string? DiscordWebhookThumbnail,
     [property: JsonPropertyName("discordWebhookBanner")] string? DiscordWebhookBanner,
     [property: JsonPropertyName("kofiVerificationToken")] string? KofiVerificationToken,
+    [property: JsonPropertyName("bmacWebhookSecret")] string? BmacWebhookSecret,
     [property: JsonPropertyName("myReferralCode")] string? MyReferralCode,
     [property: JsonPropertyName("referredBy")] Referer? ReferredBy
 );

@@ -248,8 +248,7 @@ namespace AltStreamLib.Api
         #region POST
         /// <summary>
         /// Send chat <paramref name="content"/> in streamers channel<br/>
-        /// Can reply by setting <paramref name="replyToId"/> to messageId.<br/>
-        /// 
+        /// Can reply by setting <paramref name="replyToId"/> to messageId.
         /// </summary>
         /// <param name="channelName"></param>
         /// <param name="content"></param>
