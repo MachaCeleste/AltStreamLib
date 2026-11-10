@@ -320,11 +320,11 @@ namespace AltStreamLib.EventSub
                     Action<Data> handler;
                     switch (data.Type)
                     {
-                        case MessageType.Reply:
-                            handler = OnReplyReceived;
-                            break;
                         case MessageType.Message:
                             handler = OnMessageReceived;
+                            break;
+                        case MessageType.Reply:
+                            handler = OnReplyReceived;
                             break;
                         case MessageType.Delete:
                             handler = OnMessageDeleted;

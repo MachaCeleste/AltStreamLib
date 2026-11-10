@@ -251,8 +251,7 @@ namespace AltStreamLib.Api
         #region POST
         /// <summary>
         /// Send chat <paramref name="content"/> in streamers channel<br/>
-        /// Can reply by setting <paramref name="replyToId"/> to messageId.<br/>
-        /// 
+        /// Can reply by setting <paramref name="replyToId"/> to messageId.
         /// </summary>
         /// <param name="channelName"></param>
         /// <param name="content"></param>
@@ -405,7 +404,7 @@ namespace AltStreamLib.Api
         /// <returns>A json <see cref="string"/> of your cookies. Null if unsuccessful</returns>
         public async Task<string> AuthenticateAsync(string account, string password)
         {
-            if (Session is null && HttpManager.Singleton is not null)
+            if (HttpManager.Singleton is not null)
             {
                 var authResponse = await HttpManager.Singleton.SendRequestAsync<AuthResponse>("auth/csrf");
                 if (authResponse is not null)

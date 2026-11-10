@@ -32,6 +32,15 @@ namespace AltStreamLib.Api.v1.Models
         [JsonProperty("kofiUrl")]
         public string KofiUrl { get; set; }
 
+        [JsonProperty("bmacUrl")]
+        public string BmacUrl { get; set; }
+
+        [JsonProperty("featuredSupportProvider")]
+        public string FeaturedSupportProvider { get; set; }
+
+        [JsonProperty("vgenUrl")]
+        public string VgenUrl { get; set; }
+    
         [JsonProperty("chatColor")]
         public string ChatColor { get; set; }
 
@@ -46,6 +55,9 @@ namespace AltStreamLib.Api.v1.Models
 
         [JsonProperty("isSubscriber")]
         public bool IsSubscriber { get; set; }
+
+        [JsonProperty("isChannelSubscriber")]
+        public bool IsChannelSubscriber { get; set; }
 
         [JsonProperty("isAltStreamSupporter")]
         public bool IsAltStreamSupporter { get; set; }
@@ -145,7 +157,10 @@ namespace AltStreamLib.Api.v1.Models
     
         [JsonProperty("kofiVerificationToken")]
         public string KofiVerificationToken { get; set; }
-    
+
+        [JsonProperty("bmacWebhookSecret")]
+        public string BmacWebhookSecret { get; set; }
+
         [JsonProperty("myReferralCode")]
         public string MyReferralCode { get; set; }
     
@@ -155,9 +170,10 @@ namespace AltStreamLib.Api.v1.Models
 
         public UserSettingsResponse(
             string name, string username, string image, string bio, string pronouns,
-            string blueskyUrl, string websiteUrl, string discordUrl, string kofiUrl,
+            string blueskyUrl, string websiteUrl, string discordUrl,
+            string kofiUrl, string bmacUrl, string featuredSupportProvider, string vgenUrl,
             string chatColor, List<GameInfo> gamingShelf, string offlineImage, string headerImage,
-            bool isSubscriber, bool isAltStreamSupporter, string altStreamSupporterTier, int supporterStickerBonus,
+            bool isSubscriber, bool isChannelSubscriber, bool isAltStreamSupporter, string altStreamSupporterTier, int supporterStickerBonus,
             bool isChannelSupporter, string channelBadgeImage, string channelSupporterBadgeImage, bool isSiteAdmin,
             string followedAt, string bannedUntil, int userNumber, string testerBadge, int referralCount,
             bool isReferralBadgeUnlocked, string channelPointsName, bool requireLoginToWatch,
@@ -165,7 +181,7 @@ namespace AltStreamLib.Api.v1.Models
             string discordUsername, string twitchUsername, bool hasDiscordLinked, bool hasTwitchLinked,
             string discordWebhookUrl, string discordWebhookMessage, bool discordWebhookEnabled, string discordWebhookMention,
             string discordWebhookColor, string discordWebhookThumbnail, string discordWebhookBanner, string kofiVerificationToken,
-            string myReferralCode, Referer referredBy)
+            string bmacWebhookSecret, string myReferralCode, Referer referredBy)
         {
             this.Name = name;
             this.Username = username;
@@ -176,11 +192,15 @@ namespace AltStreamLib.Api.v1.Models
             this.WebsiteUrl = websiteUrl;
             this.DiscordUrl = discordUrl;
             this.KofiUrl = kofiUrl;
+            this.BmacUrl = bmacUrl;
+            this.FeaturedSupportProvider = featuredSupportProvider;
+            this.VgenUrl = vgenUrl;
             this.ChatColor = chatColor;
             this.GamingShelf = gamingShelf;
             this.OfflineImage = offlineImage;
             this.HeaderImage = headerImage;
             this.IsSubscriber = isSubscriber;
+            this.IsChannelSubscriber = isChannelSubscriber;
             this.IsAltStreamSupporter = isAltStreamSupporter;
             this.AltStreamSupporterTier = altStreamSupporterTier;
             this.SupporterStickerBonus = supporterStickerBonus;
@@ -212,6 +232,7 @@ namespace AltStreamLib.Api.v1.Models
             this.DiscordWebhookThumbnail = discordWebhookThumbnail;
             this.DiscordWebhookBanner = discordWebhookBanner;
             this.KofiVerificationToken = kofiVerificationToken;
+            this.BmacWebhookSecret = bmacWebhookSecret;
             this.MyReferralCode = myReferralCode;
             this.ReferredBy = referredBy;
         }
