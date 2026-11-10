@@ -2,7 +2,7 @@
 
 namespace AltStreamLib.Api.Admin.Models;
 
-public record User(
+public record ChatUser(
             [property: JsonPropertyName("id")] string Id,
             [property: JsonPropertyName("name")] string Name,
             [property: JsonPropertyName("type")] string Type,
