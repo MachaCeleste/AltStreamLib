@@ -96,12 +96,12 @@ public class EventSubClient : IDisposable
     /// <summary>
     /// Called when a RaidStart event is received
     /// </summary>
-    //public event Action<Data>? OnRaidStarted;
+    public event Action<Data>? OnRaidStarted;
 
     /// <summary>
     /// Called when a RaidCanceled event is received
     /// </summary>
-    //public event Action<Data>? OnRaidCanceled;
+    public event Action<Data>? OnRaidCancelled;
 
     /// <summary>
     /// Called when a Raid event is received
@@ -327,8 +327,8 @@ public class EventSubClient : IDisposable
                     MessageType.Tip => OnTipReceived,
                     MessageType.Subscription => OnSubscriptionReceived,
                     MessageType.Shop => OnShopReceived,
-                    //MessageType.RaidStarted => OnRaidStarted,
-                    //MessageType.RaidCanceled => OnRaidCanceled,
+                    MessageType.RaidStarted => OnRaidStarted,
+                    MessageType.RaidCancelled => OnRaidCancelled,
                     MessageType.RaidReceived => OnRaidReceived,
                     MessageType.Shoutout => OnShoutoutReceived,
                     MessageType.Clear => OnClearChatReceived,

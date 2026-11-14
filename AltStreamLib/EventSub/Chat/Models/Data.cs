@@ -30,8 +30,8 @@ public enum MessageType
     [JsonStringEnumMemberName("subscription")] Subscription,
     [JsonStringEnumMemberName("shop")] Shop,
     [JsonStringEnumMemberName("raid_received")] RaidReceived,
-    //[JsonStringEnumMemberName("raid_started")] RaidStarted,
-    //[JsonStringEnumMemberName("raid_canceled")] RaidCanceled,
+    [JsonStringEnumMemberName("raid_started")] RaidStarted,
+    [JsonStringEnumMemberName("raid_cancelled")] RaidCancelled, // Typo?
     [JsonStringEnumMemberName("shoutout")] Shoutout,
     [JsonStringEnumMemberName("clear")] Clear,
     [JsonStringEnumMemberName("delete")] Delete,
