@@ -36,6 +36,7 @@ public record UserSettingsResponse(
     [property: JsonPropertyName("referralCount")] int? ReferralCount,
     [property: JsonPropertyName("isReferralBadgeUnlocked")] bool? IsReferralBadgeUnlocked,
     [property: JsonPropertyName("channelPointsName")] string? ChannelPointsName,
+    [property: JsonPropertyName("selectedBadges")] string[] SelectedBadges,
     [property: JsonPropertyName("requireLoginToWatch")] bool? RequireLoginToWatch,
     [property: JsonPropertyName("allStreamsAdult")] bool? AllStreamsAdult,
     [property: JsonPropertyName("ageVerified")] bool? AgeVerified,

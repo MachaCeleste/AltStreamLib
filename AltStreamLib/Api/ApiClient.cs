@@ -118,14 +118,17 @@ namespace AltStreamLib.Api
         }
 
         /// <summary>
-        /// Get <see cref="UserSettingsResponse"/> for a given <paramref name="channelName"/>.
+        /// Get <see cref="UserSettingsResponse"/> for a given <paramref name="channelName"/>.<br/>
+        /// Optional: <paramref name="relativeChannel"/> can be used to get relative info
         /// </summary>
-        /// <param name="channelName"></param>
+        /// <param name="channelName">Info to get</param>
+        /// <param name="relativeChannel">Channel to get info relative to</param>
         /// <returns><see cref="UserSettingsResponse"/> or null</returns>
-        public async Task<UserSettingsResponse?> GetUserSettingsInfoAsync(string channelName)
+        public async Task<UserSettingsResponse?> GetUserSettingsInfoAsync(string channelName, string relativeChannel = "")
         {
             if (HttpManager.Singleton is null) return null;
-            return await HttpManager.Singleton.SendRequestAsync<UserSettingsResponse>($"v1/user-settings/{channelName}");
+            return await HttpManager.Singleton.SendRequestAsync<UserSettingsResponse>(
+                $"v1/user-settings/{channelName}{(string.IsNullOrEmpty(relativeChannel) ? "" : $"?channel={relativeChannel}")}");
         }
 
         /// <summary>
