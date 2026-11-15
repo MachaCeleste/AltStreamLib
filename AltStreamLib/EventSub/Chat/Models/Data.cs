@@ -8,6 +8,7 @@ public record Data(
     [property: JsonPropertyName("source")] string Source,
     [property: JsonPropertyName("sentAt")] long SentAt,
     [property: JsonPropertyName("author")] Author? Author,
+    [property: JsonPropertyName("followedBy")] Author? FollowedBy,
     [property: JsonPropertyName("message")] Message? Message,
     [property: JsonPropertyName("reply")] Reply? Reply,
     [property: JsonPropertyName("redemption")] Redemption? Redemption,
@@ -31,7 +32,7 @@ public enum MessageType
     [JsonStringEnumMemberName("shop")] Shop,
     [JsonStringEnumMemberName("raid_received")] RaidReceived,
     [JsonStringEnumMemberName("raid_started")] RaidStarted,
-    [JsonStringEnumMemberName("raid_cancelled")] RaidCancelled, // Typo?
+    [JsonStringEnumMemberName("raid_cancelled")] RaidCancelled,
     [JsonStringEnumMemberName("shoutout")] Shoutout,
     [JsonStringEnumMemberName("clear")] Clear,
     [JsonStringEnumMemberName("delete")] Delete,

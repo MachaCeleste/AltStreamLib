@@ -76,7 +76,7 @@ public class EventSubClient : IDisposable
     /// Called when a Follow event is received
     /// <para>Requires auth to see</para>
     /// </summary>
-    //public event Action<Data>? OnFollowReceived;
+    public event Action<Data>? OnFollowReceived;
 
     /// <summary>
     /// Called when a KoFiTip event is received
@@ -323,7 +323,7 @@ public class EventSubClient : IDisposable
                     MessageType.Unpin => OnMessageUnPinned,
                     MessageType.Highlight => OnHighlightReceived,
                     MessageType.Redemption => OnRedemptionReceived,
-                    //MessageType.Follow => OnFollowReceived,
+                    MessageType.Follow => OnFollowReceived,
                     MessageType.Tip => OnTipReceived,
                     MessageType.Subscription => OnSubscriptionReceived,
                     MessageType.Shop => OnShopReceived,

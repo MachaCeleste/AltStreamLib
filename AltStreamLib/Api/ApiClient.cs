@@ -131,6 +131,20 @@ namespace AltStreamLib.Api
                 $"v1/user-settings/{channelName}{(string.IsNullOrEmpty(relativeChannel) ? "" : $"?channel={relativeChannel}")}");
         }
 
+        // TODO add api/activity?channel={channelName}{limit}
+        // TODO add api/stickers
+
+        /// <summary>
+        /// Get <see cref="AchievementsResponse"/> for a given <paramref name="channelName"/>
+        /// </summary>
+        /// <param name="channelName"></param>
+        /// <returns><see cref="AchievementsResponse"/> or null</returns>
+        public async Task<AchievementsResponse?> GetAchievementsAsync(string channelName)
+        {
+            if (HttpManager.Singleton is null) return null;
+            return await HttpManager.Singleton.SendRequestAsync<AchievementsResponse>($"v1/achievements/{channelName}");
+        }
+
         /// <summary>
         /// Get <see cref="User"/> info for given <paramref name="channelName"/>
         /// </summary>
@@ -140,6 +154,19 @@ namespace AltStreamLib.Api
         {
             if (HttpManager.Singleton is null) return null;
             return await HttpManager.Singleton.SendRequestAsync<User>($"v2/users/{channelName}");
+        }
+
+        /// <summary>
+        /// Get a list of <see cref="Redemption"/>s for a given <paramref name="channelName"/>
+        /// </summary>
+        /// <param name="channelName"></param>
+        /// <returns>List of <see cref="Redemption"/> or null</returns>
+        public async Task<RedemptionsResponse?> GetRedemptionsAsync(string channelName, RedemptionStatus status = RedemptionStatus.None, int limit = -1)
+        {
+            if (HttpManager.Singleton is null) return null;
+            string statusRes = status is not RedemptionStatus.None ? $"&status={status.ToString().ToLower()}" : string.Empty;
+            string limitRes = limit > -1 ? $"&limit={limit}" : string.Empty;
+            return await HttpManager.Singleton.SendRequestAsync<RedemptionsResponse>($"v2/rewards/redemptions?channel={channelName}{limitRes}");
         }
 
         /// <summary>
