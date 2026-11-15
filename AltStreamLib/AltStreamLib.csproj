@@ -8,6 +8,16 @@
     <Version>0.4.33</Version>
     <Authors>Macha Celeste</Authors>
     <Company>Celestial Corp</Company>
+    <Description>A C# wrapper for altstream.online API</Description>
+    <Copyright>MIT</Copyright>
+    <PackageProjectUrl>https://github.com/MachaCeleste/AltStreamLib</PackageProjectUrl>
+    <PackageIcon>macha_flower_clean_centered.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/MachaCeleste/AltStreamLib</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -19,11 +29,22 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\SseClientLib\SseClientLib\SseClientLib.csproj" />
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="D:\old OS (7)\Users\Haceo\Pictures\macha_flower_clean_centered.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="if &quot;$(Configuration)&quot;==&quot;Release&quot; call :Package&#xD;&#xA;goto :EOF&#xD;&#xA;&#xD;&#xA;:Package&#xD;&#xA;SET &quot;WINRAR_PATH=C:\Program Files\WinRAR\Rar.exe&quot;&#xD;&#xA;SET &quot;BUILD_ROOT=$(ProjectDir)..\Builds&quot;&#xD;&#xA;SET &quot;SOURCE_DIR=$(TargetDir)&quot;&#xD;&#xA;SET &quot;FRAMEWORK=$(TargetFramework)&quot;&#xD;&#xA;SET &quot;ARCHIVE_NAME=$(ProjectName)-v$(Version)-%25FRAMEWORK%25.rar&quot;&#xD;&#xA;if not exist &quot;%25BUILD_ROOT%25&quot; mkdir &quot;%25BUILD_ROOT%25&quot;&#xD;&#xA;&quot;%25WINRAR_PATH%25&quot; a -ep1 -r &quot;%25BUILD_ROOT%25\%25ARCHIVE_NAME%25&quot; &quot;%25SOURCE_DIR%25*&quot;&#xD;&#xA;" />
-  </Target>
+  <ItemGroup>
+    <ProjectReference Include="..\..\SseClientLib\SseClientLib\SseClientLib.csproj" />
+  </ItemGroup>
 
 </Project>
