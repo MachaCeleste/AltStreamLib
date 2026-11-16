@@ -1,4 +1,3 @@
 <Solution>
-  <Project Path="../SseClientLib/SseClientLib/SseClientLib.csproj" />
   <Project Path="AltStreamLib/AltStreamLib.csproj" />
 </Solution>

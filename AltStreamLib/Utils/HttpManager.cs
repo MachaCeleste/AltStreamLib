@@ -1,201 +1,256 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
 using System.Net.Http.Headers;
-using System.Text.Json;
 using System.Reflection;
 using System.Diagnostics;
 using AltStreamLib.Logging;
+using System.Text.Json.Serialization;
 
-namespace AltStreamLib.Utils;
+#if NET481
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading.Tasks;
+#elif NET9_0_OR_GREATER
+using System.Text.Json;
+#endif
 
-internal class HttpManager
+namespace AltStreamLib.Utils
 {
-    internal static HttpManager? Singleton { get; private set; }
-
-    internal HttpClient? Client;
-    private CookieContainer _cookieContainer = new CookieContainer();
-
-    internal HttpManager(FileVersionInfo callingInfo, string botToken, string? cookiesJson = null)
+    internal class HttpManager
     {
-        if (Singleton is not null || string.IsNullOrWhiteSpace(botToken)) return;
+        internal static HttpManager? Singleton { get; private set; }
 
-        if (!string.IsNullOrEmpty(cookiesJson))
-            LoadCookieContainerAsync(cookiesJson);
+        internal HttpClient? Client;
+        private CookieContainer _cookieContainer = new CookieContainer();
 
-        var handler = new HttpClientHandler
+        internal HttpManager(FileVersionInfo callingInfo, string botToken, string? cookiesJson = null)
         {
-            CookieContainer = _cookieContainer,
-            UseCookies = true
-        };
-        Client = new HttpClient(handler)
-        {
-            BaseAddress = new Uri("https://altstream.online/api/")
-        };
+            if (Singleton is not null || string.IsNullOrWhiteSpace(botToken)) return;
 
-        Client.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", botToken);
+            if (!string.IsNullOrEmpty(cookiesJson))
+                LoadCookieContainerAsync(cookiesJson);
 
-        Assembly? libAssembly = Assembly.GetExecutingAssembly();
-        var libraryInfo = FileVersionInfo.GetVersionInfo(libAssembly.Location);
-        Client.DefaultRequestHeaders.Add("AltStreamLib", $"{libraryInfo.ProductName}v{libraryInfo.ProductVersion}");
+            var handler = new HttpClientHandler
+            {
+                CookieContainer = _cookieContainer,
+                UseCookies = true
+            };
+            Client = new HttpClient(handler)
+            {
+                BaseAddress = new Uri("https://altstream.online/api/")
+            };
 
-        if (callingInfo != null)
-            Client.DefaultRequestHeaders.Add("CallingAssembly", $"{callingInfo.ProductName}v{callingInfo.ProductVersion}");
+            Client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", botToken);
 
-        Assembly? entryAssembly = Assembly.GetEntryAssembly();
-        if (entryAssembly != null)
-        {
-            FileVersionInfo? entryInfo = FileVersionInfo.GetVersionInfo(entryAssembly.Location);
-            if (entryInfo != null)
-                Client.DefaultRequestHeaders.Add("EntryAssembly", $"{entryInfo.ProductName}v{entryInfo.ProductVersion}");
+            Assembly? libAssembly = Assembly.GetExecutingAssembly();
+            var libraryInfo = FileVersionInfo.GetVersionInfo(libAssembly.Location);
+            Client.DefaultRequestHeaders.Add("AltStreamLib", $"{libraryInfo.ProductName}v{libraryInfo.ProductVersion}");
+
+            if (callingInfo != null)
+                Client.DefaultRequestHeaders.Add("CallingAssembly", $"{callingInfo.ProductName}v{callingInfo.ProductVersion}");
+
+            Assembly? entryAssembly = Assembly.GetEntryAssembly();
+            if (entryAssembly != null)
+            {
+                FileVersionInfo? entryInfo = FileVersionInfo.GetVersionInfo(entryAssembly.Location);
+                if (entryInfo != null)
+                    Client.DefaultRequestHeaders.Add("EntryAssembly", $"{entryInfo.ProductName}v{entryInfo.ProductVersion}");
+            }
+
+            Singleton = this;
         }
 
-        Singleton = this;
-    }
+        internal void LoadCookieContainerAsync(string json)
+        {
+#if NET481
+        var cookieList = JsonConvert.DeserializeObject<List<Cookie>>(json);
+#elif NET9_0_OR_GREATER
+            var cookieList = JsonSerializer.Deserialize<List<Cookie>>(json);
+#endif
+            if (cookieList is not null)
+                foreach (var cookie in cookieList)
+                    _cookieContainer.Add(cookie);
+        }
 
-    internal void LoadCookieContainerAsync(string json)
-    {
-        var cookieList = JsonSerializer.Deserialize<List<Cookie>>(json);
-        if (cookieList is not null)
-            foreach (var cookie in cookieList)
-                _cookieContainer.Add(cookie);
-    }
+        internal async Task<string> GetCookieContainerJsonAsync()
+        {
+#if NET481
+        CookieCollection cookies = _cookieContainer.GetCookies(Client.BaseAddress);
+#elif NET9_0_OR_GREATER
+            CookieCollection cookies = _cookieContainer.GetAllCookies();
+#endif
 
-    internal async Task<string> GetCookieContainerJsonAsync()
-    {
-        CookieCollection cookies = _cookieContainer.GetAllCookies();
+            var cookieList = new List<Cookie>();
+            foreach (Cookie cookie in cookies)
+                cookieList.Add(cookie);
+#if NET481
+        string json = JsonConvert.SerializeObject(cookieList);
+#elif NET9_0_OR_GREATER
+            string json = JsonSerializer.Serialize(cookieList, new JsonSerializerOptions { WriteIndented = true });
+#endif
 
-        var cookieList = new List<Cookie>();
-        foreach (Cookie cookie in cookies)
-            cookieList.Add(cookie);
-        string json = JsonSerializer.Serialize(cookieList, new JsonSerializerOptions { WriteIndented = true });
+            return json;
+        }
 
-        return json;
-    }
 
-    internal async Task<T?> SendRequestAsync<T>(string endpoint)
-    {
-        try
+#if NET481
+    internal async Task<T> SendRequestAsync<T>(string endpoint)
+#elif NET9_0_OR_GREATER
+        internal async Task<T?> SendRequestAsync<T>(string endpoint)
+#endif
         {
-            return await Client.GetFromJsonAsync<T>(endpoint);
+            try
+            {
+                return await Client.GetFromJsonAsync<T>(endpoint);
+            }
+            catch (HttpRequestException ex)
+            {
+                Logger.Singleton?.Log(LogLevel.Error, ex.Message, ex);
+                return default;
+            }
+            catch (Exception ex)
+            {
+                Logger.Singleton?.Log(LogLevel.Error, ex.Message, ex);
+                throw;
+            }
         }
-        catch (HttpRequestException ex)
-        {
-            Logger.Singleton?.Log(LogLevel.Error, ex.Message, ex);
-            return default;
-        }
-        catch (Exception ex)
-        {
-            Logger.Singleton?.Log(LogLevel.Error, ex.Message, ex);
-            throw;
-        }
-    }
 
-    internal async Task<TResponse?> SendPutRequestAsync<TRequest, TResponse>(string endpoint, TRequest payload)
-    {
-        try
+#if NET481
+    internal async Task<TResponse> SendPutRequestAsync<TRequest, TResponse>(string endpoint, TRequest payload)
+#elif NET9_0_OR_GREATER
+        internal async Task<TResponse?> SendPutRequestAsync<TRequest, TResponse>(string endpoint, TRequest payload)
+#endif
         {
-            using var response = await Client.PutAsJsonAsync(endpoint, payload);
-            response.EnsureSuccessStatusCode();
+            try
+            {
+                using var response = await Client.PutAsJsonAsync(endpoint, payload);
+                response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadFromJsonAsync<TResponse>();
+                return await response.Content.ReadFromJsonAsync<TResponse>();
+            }
+            catch (HttpRequestException ex)
+            {
+                Logger.Singleton?.Log(LogLevel.Error, ex.Message, ex);
+                return default;
+            }
+            catch (Exception ex)
+            {
+                Logger.Singleton?.Log(LogLevel.Error, ex.Message, ex);
+                throw;
+            }
         }
-        catch (HttpRequestException ex)
-        {
-            Logger.Singleton?.Log(LogLevel.Error, ex.Message, ex);
-            return default;
-        }
-        catch (Exception ex)
-        {
-            Logger.Singleton?.Log(LogLevel.Error, ex.Message, ex);
-            throw;
-        }
-    }
 
-    internal async Task<bool> SendPostRequestAsync<TRequest>(string endpoint, TRequest payload)
-    {
-        try
+        internal async Task<bool> SendPostRequestAsync<TRequest>(string endpoint, TRequest payload)
         {
-            using var response = await Client.PostAsJsonAsync(endpoint, payload);
-            response.EnsureSuccessStatusCode();
+            try
+            {
+                using var response = await Client.PostAsJsonAsync(endpoint, payload);
+                response.EnsureSuccessStatusCode();
 
-            return true;
+                return true;
+            }
+            catch (HttpRequestException ex)
+            {
+                Logger.Singleton?.Log(LogLevel.Error, ex.Message, ex);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Logger.Singleton?.Log(LogLevel.Error, ex.Message, ex);
+                throw;
+            }
         }
-        catch (HttpRequestException ex)
-        {
-            Logger.Singleton?.Log(LogLevel.Error, ex.Message, ex);
-            return false;
-        }
-        catch (Exception ex)
-        {
-            Logger.Singleton?.Log(LogLevel.Error, ex.Message, ex);
-            throw;
-        }
-    }
 
-    internal async Task<TResponse?> SendPostRequestAsync<TRequest, TResponse>(string endpoint, TRequest payload)
-    {
-        try
+#if NET481
+    internal async Task<TResponse> SendPostRequestAsync<TRequest, TResponse>(string endpoint, TRequest payload)
+#elif NET9_0_OR_GREATER
+        internal async Task<TResponse?> SendPostRequestAsync<TRequest, TResponse>(string endpoint, TRequest payload)
+#endif
         {
-            using var response = await Client.PostAsJsonAsync(endpoint, payload);
-            response.EnsureSuccessStatusCode();
+            try
+            {
+                using var response = await Client.PostAsJsonAsync(endpoint, payload);
+                response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadFromJsonAsync<TResponse>();
+                return await response.Content.ReadFromJsonAsync<TResponse>();
+            }
+            catch (HttpRequestException ex)
+            {
+                Logger.Singleton?.Log(LogLevel.Error, ex.Message, ex);
+                return default;
+            }
+            catch (Exception ex)
+            {
+                Logger.Singleton?.Log(LogLevel.Error, ex.Message, ex);
+                throw;
+            }
         }
-        catch (HttpRequestException ex)
-        {
-            Logger.Singleton?.Log(LogLevel.Error, ex.Message, ex);
-            return default;
-        }
-        catch (Exception ex)
-        {
-            Logger.Singleton?.Log(LogLevel.Error, ex.Message, ex);
-            throw;
-        }
-    }
 
-    internal async Task<TResponse?> SendPatchRequestAsync<TRequest, TResponse>(string endpoint, TRequest payload)
-    {
-        try
+#if NET481
+    internal async Task<TResponse> SendPatchRequestAsync<TRequest, TResponse>(string endpoint, TRequest payload)
+#elif NET9_0_OR_GREATER
+        internal async Task<TResponse?> SendPatchRequestAsync<TRequest, TResponse>(string endpoint, TRequest payload)
+#endif
         {
-            var json = JsonSerializer.Serialize(payload);
-            using var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            try
+            {
+#if NET481
+            var json = JsonConvert.SerializeObject(payload);
+#elif NET9_0_OR_GREATER
+                var json = JsonSerializer.Serialize(payload);
+#endif
+                using var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
 
-            using var response = await Client.PatchAsync(endpoint, content);
-            response.EnsureSuccessStatusCode();
+#if NET481
+            var request = new HttpRequestMessage
+            {
+                Method = new HttpMethod("PATCH"),
+                RequestUri = new Uri(Client.BaseAddress, endpoint),
+                Content = content
+            };
 
-            return await response.Content.ReadFromJsonAsync<TResponse>();
-        }
-        catch (HttpRequestException ex)
-        {
-            Logger.Singleton?.Log(LogLevel.Error, ex.Message, ex);
-            return default;
-        }
-        catch (Exception ex)
-        {
-            Logger.Singleton?.Log(LogLevel.Error, ex.Message, ex);
-            throw;
-        }
-    }
+            using var response = await Client.SendAsync(request);
+#elif NET9_0_OR_GREATER
+                using var response = await Client.PatchAsync(endpoint, content);
+#endif
+                response.EnsureSuccessStatusCode();
 
-    internal async Task<bool> SendDeleteRequestAsync(string endpoint)
-    {
-        try
-        {
-            using var response = await Client.DeleteAsync(endpoint);
-            response.EnsureSuccessStatusCode();
+                return await response.Content.ReadFromJsonAsync<TResponse>();
+            }
+            catch (HttpRequestException ex)
+            {
+                Logger.Singleton?.Log(LogLevel.Error, ex.Message, ex);
+                return default;
+            }
+            catch (Exception ex)
+            {
+                Logger.Singleton?.Log(LogLevel.Error, ex.Message, ex);
+                throw;
+            }
+        }
 
-            return true;
-        }
-        catch (HttpRequestException ex)
+        internal async Task<bool> SendDeleteRequestAsync(string endpoint)
         {
-            Logger.Singleton?.Log(LogLevel.Error, ex.Message, ex);
-            return false;
-        }
-        catch (Exception ex)
-        {
-            Logger.Singleton?.Log(LogLevel.Error, ex.Message, ex);
-            throw;
+            try
+            {
+                using var response = await Client.DeleteAsync(endpoint);
+                response.EnsureSuccessStatusCode();
+
+                return true;
+            }
+            catch (HttpRequestException ex)
+            {
+                Logger.Singleton?.Log(LogLevel.Error, ex.Message, ex);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Logger.Singleton?.Log(LogLevel.Error, ex.Message, ex);
+                throw;
+            }
         }
     }
 }

@@ -1,7 +1,28 @@
-﻿using System.Text.Json.Serialization;
+﻿#if NET481
+using System.Collections.Generic;
+using Newtonsoft.Json;
+#elif NET9_0_OR_GREATER
+using System.Text.Json.Serialization;
+#endif
 
-namespace AltStreamLib.Api.v2.Models;
+namespace AltStreamLib.Api.v2.Models
+{
+#if NET481
+    public class RedemptionsResponse
+    {
+        [JsonProperty("redemptions")]
+        public List<Redemption> Redemptions { get; set; }
 
-public record RedemptionsResponse(
-    [property: JsonPropertyName("redemptions")] List<Redemption> Redemptions
-);
+        public RedemptionsResponse(List<Redemption> redemptions)
+        {
+            this.Redemptions = redemptions;
+        }
+
+        public RedemptionsResponse() { }
+    }
+#elif NET9_0_OR_GREATER
+    public record RedemptionsResponse(
+        [property: JsonPropertyName("redemptions")] List<Redemption> Redemptions
+    );
+#endif
+}
