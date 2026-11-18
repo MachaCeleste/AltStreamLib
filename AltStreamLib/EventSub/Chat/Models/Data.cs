@@ -1,4 +1,4 @@
-﻿#if NET481
+﻿#if NET461 || NET472 || NET481
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 
 namespace AltStreamLib.EventSub.Chat.Models
 {
-#if NET481
+#if NET461 || NET472 || NET481
     public class Data
     {
         [JsonProperty("id")]

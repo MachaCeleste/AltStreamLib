@@ -6,7 +6,7 @@ using System.Diagnostics;
 using AltStreamLib.Logging;
 using System.Text.Json.Serialization;
 
-#if NET481
+#if NET461 || NET472 || NET481
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -65,7 +65,7 @@ namespace AltStreamLib.Utils
 
         internal void LoadCookieContainerAsync(string json)
         {
-#if NET481
+#if NET461 || NET472 || NET481
         var cookieList = JsonConvert.DeserializeObject<List<Cookie>>(json);
 #elif NET9_0_OR_GREATER
             var cookieList = JsonSerializer.Deserialize<List<Cookie>>(json);
@@ -77,7 +77,7 @@ namespace AltStreamLib.Utils
 
         internal async Task<string> GetCookieContainerJsonAsync()
         {
-#if NET481
+#if NET461 || NET472 || NET481
         CookieCollection cookies = _cookieContainer.GetCookies(Client.BaseAddress);
 #elif NET9_0_OR_GREATER
             CookieCollection cookies = _cookieContainer.GetAllCookies();
@@ -86,7 +86,7 @@ namespace AltStreamLib.Utils
             var cookieList = new List<Cookie>();
             foreach (Cookie cookie in cookies)
                 cookieList.Add(cookie);
-#if NET481
+#if NET461 || NET472 || NET481
         string json = JsonConvert.SerializeObject(cookieList);
 #elif NET9_0_OR_GREATER
             string json = JsonSerializer.Serialize(cookieList, new JsonSerializerOptions { WriteIndented = true });
@@ -96,7 +96,7 @@ namespace AltStreamLib.Utils
         }
 
 
-#if NET481
+#if NET461 || NET472 || NET481
     internal async Task<T> SendRequestAsync<T>(string endpoint)
 #elif NET9_0_OR_GREATER
         internal async Task<T?> SendRequestAsync<T>(string endpoint)
@@ -118,7 +118,7 @@ namespace AltStreamLib.Utils
             }
         }
 
-#if NET481
+#if NET461 || NET472 || NET481
     internal async Task<TResponse> SendPutRequestAsync<TRequest, TResponse>(string endpoint, TRequest payload)
 #elif NET9_0_OR_GREATER
         internal async Task<TResponse?> SendPutRequestAsync<TRequest, TResponse>(string endpoint, TRequest payload)
@@ -164,7 +164,7 @@ namespace AltStreamLib.Utils
             }
         }
 
-#if NET481
+#if NET461 || NET472 || NET481
     internal async Task<TResponse> SendPostRequestAsync<TRequest, TResponse>(string endpoint, TRequest payload)
 #elif NET9_0_OR_GREATER
         internal async Task<TResponse?> SendPostRequestAsync<TRequest, TResponse>(string endpoint, TRequest payload)
@@ -189,7 +189,7 @@ namespace AltStreamLib.Utils
             }
         }
 
-#if NET481
+#if NET461 || NET472 || NET481
     internal async Task<TResponse> SendPatchRequestAsync<TRequest, TResponse>(string endpoint, TRequest payload)
 #elif NET9_0_OR_GREATER
         internal async Task<TResponse?> SendPatchRequestAsync<TRequest, TResponse>(string endpoint, TRequest payload)
@@ -197,14 +197,14 @@ namespace AltStreamLib.Utils
         {
             try
             {
-#if NET481
+#if NET461 || NET472 || NET481
             var json = JsonConvert.SerializeObject(payload);
 #elif NET9_0_OR_GREATER
                 var json = JsonSerializer.Serialize(payload);
 #endif
                 using var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
 
-#if NET481
+#if NET461 || NET472 || NET481
             var request = new HttpRequestMessage
             {
                 Method = new HttpMethod("PATCH"),

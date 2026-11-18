@@ -1,4 +1,4 @@
-﻿#if NET481
+﻿#if NET461 || NET472 || NET481
 using System.Collections.Generic;
 using Newtonsoft.Json;
 #elif NET9_0_OR_GREATER
@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 
 namespace AltStreamLib.Api.v1.Models
 {
-#if NET481
+#if NET461 || NET472 || NET481
     public class PanelsResponse
     {
         [JsonProperty("channel")]

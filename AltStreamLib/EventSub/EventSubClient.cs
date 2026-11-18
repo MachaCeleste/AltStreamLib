@@ -6,7 +6,7 @@ using AltStreamLib.EventSub.Chat.Models;
 using AltStreamLib.Logging;
 using AltStreamLib.Utils;
 
-#if NET481
+#if NET461 || NET472 || NET481
 using System;
 using System.Net.Http;
 using System.Threading;
@@ -22,7 +22,7 @@ namespace AltStreamLib.EventSub
     {
         public string ChannelName { get; private set; }
 
-#if NET481
+#if NET461 || NET472 || NET481
         private readonly SseClient _sseClient;
         private Task _connectionTask;
         private CancellationTokenSource _shutdownCts;
@@ -287,7 +287,7 @@ namespace AltStreamLib.EventSub
                     break;
                 }
 
-#if NET481
+#if NET461 || NET472 || NET481
                 TimeSpan delay = TimeSpan.FromTicks((long)(_baseReconnectDelay.Ticks
                     * Math.Pow(2, _reconnectionAttempts - 1)))
                     + TimeSpan.FromTicks(new Random().Next(0, 1000) * 10);
@@ -332,7 +332,7 @@ namespace AltStreamLib.EventSub
             {
                 try
                 {
-#if NET481
+#if NET461 || NET472 || NET481
                     Data data = JsonConvert.DeserializeObject<Data>(payload)
                         ?? throw new NullReferenceException("Packet data is null");
                         

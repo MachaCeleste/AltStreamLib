@@ -1,4 +1,4 @@
-﻿#if NET481
+﻿#if NET461 || NET472 || NET481
 using System;
 #endif
 namespace AltStreamLib.Logging
@@ -19,7 +19,7 @@ namespace AltStreamLib.Logging
             OnLog?.Invoke(new LogMessage(logLevel, message, error));
     }
 
-#if NET481
+#if NET461 || NET472 || NET481
 public class LogMessage
 {
     public LogLevel LogLevel { get; set; }

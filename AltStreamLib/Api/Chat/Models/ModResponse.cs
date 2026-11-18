@@ -1,13 +1,13 @@
-﻿#if NET481
+﻿#if NET461 || NET472 || NET481
 using System.Collections.Generic;
 using Newtonsoft.Json;
 #elif NET9_0_OR_GREATER
-#endif
 using System.Text.Json.Serialization;
+#endif
 
 namespace AltStreamLib.Api.Chat.Models
 {
-#if NET481
+#if NET461 || NET472 || NET481
     public class ModResponse
     {
         [JsonProperty("success")]

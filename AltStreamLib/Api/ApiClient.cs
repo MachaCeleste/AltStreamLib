@@ -12,7 +12,7 @@ using AltStreamLib.Api.Admin.Models;
 using AltStreamLib.EventSub;
 using AltStreamLib.Utils;
 
-#if NET481
+#if NET461 || NET472 || NET481
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -22,7 +22,7 @@ namespace AltStreamLib.Api
 {
     public class ApiClient : IDisposable
     {
-#if NET481
+#if NET461 || NET472 || NET481
         public SessionResponse Session { get; private set; }
 
         private StreamKeyResponse _streamKey;
