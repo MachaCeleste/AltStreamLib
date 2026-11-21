@@ -1,20 +1,20 @@
-﻿using System.Net;
+﻿#if NET461 || NET472 || NET481
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
+#elif NET9_0_OR_GREATER
+using System.Text.Json;
+using System.Text.Json.Serialization;
+#endif
+
+using System.Net;
 using System.Net.Http.Json;
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Diagnostics;
 using AltStreamLib.Logging;
-using System.Text.Json.Serialization;
-
-#if NET461 || NET472 || NET481
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Threading.Tasks;
-#elif NET9_0_OR_GREATER
-using System.Text.Json;
-#endif
 
 namespace AltStreamLib.Utils
 {

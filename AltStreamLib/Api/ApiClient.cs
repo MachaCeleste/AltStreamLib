@@ -1,36 +1,33 @@
-﻿using System.Reflection;
-using System.Diagnostics;
-using AltStreamLib.Api.Models;
-using AltStreamLib.Api.v1.Models;
-using AltStreamLib.Api.v2.Models;
-using AltStreamLib.Api.Chat.Models;
-using AltStreamLib.Api.Auth.Models;
-using AltStreamLib.Api.Rewards.Models;
-using AltStreamLib.Api.Shoutout.Models;
-using AltStreamLib.Api.Live.Models;
-using AltStreamLib.Api.Admin.Models;
-using AltStreamLib.EventSub;
-using AltStreamLib.Utils;
-
-#if NET461 || NET472 || NET481
+﻿#if NET461 || NET472 || NET481
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 #endif
 
+using System.Reflection;
+using System.Diagnostics;
+using AltStreamLib.Api.Models;
+using AltStreamLib.Api.Models.v1;
+using AltStreamLib.Api.Models.v2;
+using AltStreamLib.Api.Models.Activity;
+using AltStreamLib.Api.Models.Admin;
+using AltStreamLib.Api.Models.Auth;
+using AltStreamLib.Api.Models.Chat;
+using AltStreamLib.Api.Models.Live;
+using AltStreamLib.Api.Models.Rewards;
+using AltStreamLib.Api.Models.Shoutout;
+using AltStreamLib.Api.Models.Stickers;
+using AltStreamLib.Api.Models.User_Settings;
+using AltStreamLib.EventSub;
+using AltStreamLib.Utils;
+
 namespace AltStreamLib.Api
 {
     public class ApiClient : IDisposable
     {
-#if NET461 || NET472 || NET481
-        public SessionResponse Session { get; private set; }
-
-        private StreamKeyResponse _streamKey;
-#elif NET9_0_OR_GREATER
         public SessionResponse? Session { get; private set; }
 
         private StreamKeyResponse? _streamKey;
-#endif
 
         /// <summary>
         /// Initialize new API Client.
@@ -88,13 +85,8 @@ namespace AltStreamLib.Api
         /// <returns><see cref="RewardsResponse"/> or null</returns>
         public async Task<RewardsResponse> GetRewardsInfoAsync(string channelName)
         {
-            if (HttpManager.Singleton is not null)
-            {
-                var res = await HttpManager.Singleton.SendRequestAsync<RewardsResponse>($"rewards?channel={channelName}&includeDisabled=true");
-                if (res != null)
-                    return res;
-            }
-            return null;
+            if (HttpManager.Singleton is null) return null;
+            return await HttpManager.Singleton.SendRequestAsync<RewardsResponse>($"rewards?channel={channelName}&includeDisabled=true");
         }
 
         /// <summary>
@@ -143,11 +135,18 @@ namespace AltStreamLib.Api
                 $"v1/user-settings/{channelName}{(string.IsNullOrEmpty(relativeChannel) ? "" : $"?channel={relativeChannel}")}");
         }
 
-        // TODO add api/activity?channel={channelName}{limit}
-        // TODO add api/stickers
+        /// <summary>
+        /// Get all stickers available on the site.
+        /// </summary>
+        /// <returns><see cref="StickersResponse"/> or null</returns>
+        public async Task<StickersResponse> GetStickersAsync()
+        {
+            if (HttpManager.Singleton is null) return null;
+            return await HttpManager.Singleton.SendRequestAsync<StickersResponse>("stickers");
+        }
 
         /// <summary>
-        /// Get <see cref="AchievementsResponse"/> for a given <paramref name="channelName"/>
+        /// Get <see cref="AchievementsResponse"/> for a given <paramref name="channelName"/>.
         /// </summary>
         /// <param name="channelName"></param>
         /// <returns><see cref="AchievementsResponse"/> or null</returns>
@@ -158,7 +157,7 @@ namespace AltStreamLib.Api
         }
 
         /// <summary>
-        /// Get <see cref="User"/> info for given <paramref name="channelName"/>
+        /// Get <see cref="User"/> info for given <paramref name="channelName"/>.
         /// </summary>
         /// <param name="channelName"></param>
         /// <returns><see cref="User"/> or null</returns>
@@ -169,7 +168,7 @@ namespace AltStreamLib.Api
         }
 
         /// <summary>
-        /// Get a list of <see cref="Redemption"/>s for a given <paramref name="channelName"/>
+        /// Get a list of <see cref="Redemption"/>s for a given <paramref name="channelName"/>.
         /// </summary>
         /// <param name="channelName"></param>
         /// <returns>List of <see cref="Redemption"/> or null</returns>
@@ -202,6 +201,29 @@ namespace AltStreamLib.Api
         {
             if (Session is null || HttpManager.Singleton is null) return null;
             return await HttpManager.Singleton.SendRequestAsync<ChatUsersRequest>($"admin/chat-users?channel={channelName}");
+        }
+
+        /// <summary>
+        /// Get <see cref="ActivityResponse"/> containing activity event history info.
+        /// <para>Requires Auth</para>
+        /// </summary>
+        /// <param name="limit">Optional limit to results</param>
+        /// <returns><see cref="ActivityResponse"/> or null</returns>
+        public async Task<ActivityResponse> GetActivityAsync(int limit = -1)
+        {
+            if (Session is null || HttpManager.Singleton is null) return null;
+            return await HttpManager.Singleton.SendRequestAsync<ActivityResponse>($"activity?channel={Session.User.Username}{(limit == -1 ? "" : $"&limit={limit}")}");
+        }
+
+        /// <summary>
+        /// Gets a <see cref="SubscribersResponse"/> containing subscription history info.
+        /// <para>Requires Auth</para>
+        /// </summary>
+        /// <returns><see cref="SubscribersResponse"/> or null</returns>
+        public async Task<SubscribersResponse> GetSubscribersAsync()
+        {
+            if (Session is null || HttpManager.Singleton is null) return null;
+            return await HttpManager.Singleton.SendRequestAsync<SubscribersResponse>($"user-settings/kofi-subscribers?channel={Session.User.Username}");
         }
 
         /// <summary>
@@ -439,6 +461,31 @@ namespace AltStreamLib.Api
         {
             if (Session is not null && HttpManager.Singleton is not null)
                 return await HttpManager.Singleton.SendDeleteRequestAsync($"rewards?id={rewardId}&username={Session.User.Username}");
+            return false;
+        }
+
+        /// <summary>
+        /// Delete message by <paramref name="messageId"/>.
+        /// <para>Requires Auth</para>
+        /// </summary>
+        /// <param name="messageId"></param>
+        /// <returns>False if unsuccessful</returns>
+        public async Task<bool> DeleteMessageAsync(string messageId)
+        {
+            if (Session is not null && HttpManager.Singleton is not null)
+                return await HttpManager.Singleton.SendDeleteRequestAsync($"chat?channel={Session.User.Username}&id={messageId}");
+            return false;
+        }
+
+        /// <summary>
+        /// Reset stream game to Just Chatting.
+        /// <para>Requires Auth</para>
+        /// </summary>
+        /// <returns>False if unsuccessful</returns>
+        public async Task<bool> DeleteStreamGameAsync()
+        {
+            if (Session is not null && HttpManager.Singleton is not null)
+                return await HttpManager.Singleton.SendDeleteRequestAsync("live/game");
             return false;
         }
         #endregion

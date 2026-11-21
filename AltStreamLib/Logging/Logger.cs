@@ -1,6 +1,7 @@
 ﻿#if NET461 || NET472 || NET481
 using System;
 #endif
+
 namespace AltStreamLib.Logging
 {
     public class Logger

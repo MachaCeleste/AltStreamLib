@@ -1,12 +1,4 @@
-﻿using System.Reflection;
-using System.Diagnostics;
-using SseClientLib;
-using AltStreamLib.Api;
-using AltStreamLib.EventSub.Chat.Models;
-using AltStreamLib.Logging;
-using AltStreamLib.Utils;
-
-#if NET461 || NET472 || NET481
+﻿#if NET461 || NET472 || NET481
 using System;
 using System.Net.Http;
 using System.Threading;
@@ -16,21 +8,23 @@ using Newtonsoft.Json;
 using System.Text.Json;
 #endif
 
+using System.Reflection;
+using System.Diagnostics;
+using SseClientLib;
+using AltStreamLib.Api;
+using AltStreamLib.EventSub.Chat.Models;
+using AltStreamLib.Logging;
+using AltStreamLib.Utils;
+
 namespace AltStreamLib.EventSub
 {
     public class EventSubClient : IDisposable
     {
         public string ChannelName { get; private set; }
 
-#if NET461 || NET472 || NET481
-        private readonly SseClient _sseClient;
-        private Task _connectionTask;
-        private CancellationTokenSource _shutdownCts;
-#elif NET9_0_OR_GREATER
         private readonly SseClient? _sseClient;
         private Task? _connectionTask;
         private CancellationTokenSource? _shutdownCts;
-#endif
 
         private int _reconnectionAttempts;
         private const int MaxReconnectionAttempts = 5;
