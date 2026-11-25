@@ -12,7 +12,7 @@ namespace AltStreamLib.EventSub.Chat.Models
         [JsonProperty("messageId")]
         public string MessageId { get; set; }
     
-        [JsonProperty("messageAuthorDisplay")]
+        [JsonProperty("messageAuthorDisplayName")]
         public string MessageAuthorDisplayName { get; set; }
     
         [JsonProperty("messageAuthorChannelName")]

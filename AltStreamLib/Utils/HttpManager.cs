@@ -1,16 +1,15 @@
 ﻿#if NET461 || NET472 || NET481
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 #elif NET9_0_OR_GREATER
 using System.Text.Json;
-using System.Text.Json.Serialization;
 #endif
 
+using System.Text;
 using System.Net;
-using System.Net.Http.Json;
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Diagnostics;
@@ -23,6 +22,7 @@ namespace AltStreamLib.Utils
         internal static HttpManager? Singleton { get; private set; }
 
         internal HttpClient? Client;
+
         private CookieContainer _cookieContainer = new CookieContainer();
 
         internal HttpManager(FileVersionInfo callingInfo, string botToken, string? cookiesJson = null)
@@ -63,10 +63,11 @@ namespace AltStreamLib.Utils
             Singleton = this;
         }
 
+        #region Cookies
         internal void LoadCookieContainerAsync(string json)
         {
 #if NET461 || NET472 || NET481
-        var cookieList = JsonConvert.DeserializeObject<List<Cookie>>(json);
+            var cookieList = JsonConvert.DeserializeObject<List<Cookie>>(json);
 #elif NET9_0_OR_GREATER
             var cookieList = JsonSerializer.Deserialize<List<Cookie>>(json);
 #endif
@@ -78,7 +79,7 @@ namespace AltStreamLib.Utils
         internal async Task<string> GetCookieContainerJsonAsync()
         {
 #if NET461 || NET472 || NET481
-        CookieCollection cookies = _cookieContainer.GetCookies(Client.BaseAddress);
+            CookieCollection cookies = _cookieContainer.GetCookies(Client.BaseAddress);
 #elif NET9_0_OR_GREATER
             CookieCollection cookies = _cookieContainer.GetAllCookies();
 #endif
@@ -87,24 +88,26 @@ namespace AltStreamLib.Utils
             foreach (Cookie cookie in cookies)
                 cookieList.Add(cookie);
 #if NET461 || NET472 || NET481
-        string json = JsonConvert.SerializeObject(cookieList);
+            string json = JsonConvert.SerializeObject(cookieList);
 #elif NET9_0_OR_GREATER
             string json = JsonSerializer.Serialize(cookieList, new JsonSerializerOptions { WriteIndented = true });
 #endif
 
             return json;
         }
+        #endregion
 
-
-#if NET461 || NET472 || NET481
-    internal async Task<T> SendRequestAsync<T>(string endpoint)
-#elif NET9_0_OR_GREATER
-        internal async Task<T?> SendRequestAsync<T>(string endpoint)
-#endif
+        #region Request
+        internal async Task<TResponse?> SendGetRequestAsync<TResponse>(string endpoint)
         {
             try
             {
-                return await Client.GetFromJsonAsync<T>(endpoint);
+                var response = await Client.GetAsync(endpoint);
+                response.EnsureSuccessStatusCode();
+
+                var resJson = await response.Content.ReadAsStringAsync()
+                    ?? throw new HttpRequestException("Null return.");
+                return await DeserializeResponse<TResponse>(resJson);
             }
             catch (HttpRequestException ex)
             {
@@ -118,18 +121,16 @@ namespace AltStreamLib.Utils
             }
         }
 
-#if NET461 || NET472 || NET481
-    internal async Task<TResponse> SendPutRequestAsync<TRequest, TResponse>(string endpoint, TRequest payload)
-#elif NET9_0_OR_GREATER
         internal async Task<TResponse?> SendPutRequestAsync<TRequest, TResponse>(string endpoint, TRequest payload)
-#endif
         {
             try
             {
-                using var response = await Client.PutAsJsonAsync(endpoint, payload);
+                var content = SerializePaload(payload);
+                using var response = await Client.PutAsync(endpoint, content);
                 response.EnsureSuccessStatusCode();
 
-                return await response.Content.ReadFromJsonAsync<TResponse>();
+                var resJson = await response.Content.ReadAsStringAsync();
+                return await DeserializeResponse<TResponse>(resJson);
             }
             catch (HttpRequestException ex)
             {
@@ -147,7 +148,8 @@ namespace AltStreamLib.Utils
         {
             try
             {
-                using var response = await Client.PostAsJsonAsync(endpoint, payload);
+                var content = SerializePaload(payload);
+                using var response = await Client.PostAsync(endpoint, content);
                 response.EnsureSuccessStatusCode();
 
                 return true;
@@ -164,18 +166,16 @@ namespace AltStreamLib.Utils
             }
         }
 
-#if NET461 || NET472 || NET481
-    internal async Task<TResponse> SendPostRequestAsync<TRequest, TResponse>(string endpoint, TRequest payload)
-#elif NET9_0_OR_GREATER
         internal async Task<TResponse?> SendPostRequestAsync<TRequest, TResponse>(string endpoint, TRequest payload)
-#endif
         {
             try
             {
-                using var response = await Client.PostAsJsonAsync(endpoint, payload);
+                var content = SerializePaload(payload);
+                using var response = await Client.PostAsync(endpoint, content);
                 response.EnsureSuccessStatusCode();
 
-                return await response.Content.ReadFromJsonAsync<TResponse>();
+                var resJson = await response.Content.ReadAsStringAsync();
+                return await DeserializeResponse<TResponse>(resJson);
             }
             catch (HttpRequestException ex)
             {
@@ -189,21 +189,11 @@ namespace AltStreamLib.Utils
             }
         }
 
-#if NET461 || NET472 || NET481
-    internal async Task<TResponse> SendPatchRequestAsync<TRequest, TResponse>(string endpoint, TRequest payload)
-#elif NET9_0_OR_GREATER
         internal async Task<TResponse?> SendPatchRequestAsync<TRequest, TResponse>(string endpoint, TRequest payload)
-#endif
         {
             try
             {
-#if NET461 || NET472 || NET481
-            var json = JsonConvert.SerializeObject(payload);
-#elif NET9_0_OR_GREATER
-                var json = JsonSerializer.Serialize(payload);
-#endif
-                using var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-
+                using var content = SerializePaload(payload);
 #if NET461 || NET472 || NET481
             var request = new HttpRequestMessage
             {
@@ -218,7 +208,8 @@ namespace AltStreamLib.Utils
 #endif
                 response.EnsureSuccessStatusCode();
 
-                return await response.Content.ReadFromJsonAsync<TResponse>();
+                var resJson = await response.Content.ReadAsStringAsync();
+                return await DeserializeResponse<TResponse>(resJson);
             }
             catch (HttpRequestException ex)
             {
@@ -252,5 +243,27 @@ namespace AltStreamLib.Utils
                 throw;
             }
         }
+        #endregion
+
+        #region Helpers
+        private StringContent SerializePaload(object payload)
+        {
+#if NET461 || NET472 || NET481
+                var json = JsonConvert.SerializeObject(payload);
+#elif NET9_0_OR_GREATER
+            var json = JsonSerializer.Serialize(payload);
+#endif
+            return new StringContent(json, Encoding.UTF8, "application/json");
+        }
+
+        private async Task<T?> DeserializeResponse<T>(string json)
+        {
+#if NET461 || NET472 || NET481
+            return JsonConvert.DeserializeObject<T>(json);
+#elif NET9_0_OR_GREATER
+            return JsonSerializer.Deserialize<T?>(json);
+#endif
+        }
+        #endregion
     }
 }

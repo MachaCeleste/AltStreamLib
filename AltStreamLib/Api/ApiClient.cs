@@ -31,7 +31,7 @@ namespace AltStreamLib.Api
 
         /// <summary>
         /// Initialize new API Client.
-        /// <para>Rate limit is 60 Requests/minute.</para>
+        /// <para>Please rate limit to 60 Requests/minute.</para>
         /// </summary>
         /// <param name="botToken">Your bots token</param>
         /// <param name="cookiesJson">A json string of your cookies to load. (Only required in <see cref="ApiClient"/> OR <see cref="EventSubClient"/>)</param>
@@ -55,7 +55,7 @@ namespace AltStreamLib.Api
         {
             if (HttpManager.Singleton is not null)
             {
-                var res = await HttpManager.Singleton.SendRequestAsync<ApiResponse<ChannelResponse>>($"v1/channels/{channelName}");
+                var res = await HttpManager.Singleton.SendGetRequestAsync<ApiResponse<ChannelResponse>>($"v1/channels/{channelName}");
                 if (res != null)
                     return res.Data;
             }
@@ -71,7 +71,7 @@ namespace AltStreamLib.Api
         {
             if (HttpManager.Singleton is not null)
             {
-                var res = await HttpManager.Singleton.SendRequestAsync<ApiResponse<PanelsResponse>>($"v1/channels/{channelName}/panels");
+                var res = await HttpManager.Singleton.SendGetRequestAsync<ApiResponse<PanelsResponse>>($"v1/channels/{channelName}/panels");
                 if (res != null)
                     return res.Data;
             }
@@ -83,10 +83,10 @@ namespace AltStreamLib.Api
         /// </summary>
         /// <param name="channelName"></param>
         /// <returns><see cref="RewardsResponse"/> or null</returns>
-        public async Task<RewardsResponse> GetRewardsInfoAsync(string channelName)
+        public async Task<RewardsResponse?> GetRewardsInfoAsync(string channelName)
         {
             if (HttpManager.Singleton is null) return null;
-            return await HttpManager.Singleton.SendRequestAsync<RewardsResponse>($"rewards?channel={channelName}&includeDisabled=true");
+            return await HttpManager.Singleton.SendGetRequestAsync<RewardsResponse>($"rewards?channel={channelName}&includeDisabled=true");
         }
 
         /// <summary>
@@ -94,11 +94,11 @@ namespace AltStreamLib.Api
         /// </summary>
         /// <param name="channelName"></param>
         /// <returns><see cref="EmotesResponse"/> or null</returns>
-        public async Task<EmotesResponse> GetEmotesInfoAsync(string channelName)
+        public async Task<EmotesResponse?> GetEmotesInfoAsync(string channelName)
         {
             if (HttpManager.Singleton is not null)
             {
-                var res = await HttpManager.Singleton.SendRequestAsync<ApiResponse<EmotesResponse>>($"v1/channels/{channelName}/emotes");
+                var res = await HttpManager.Singleton.SendGetRequestAsync<ApiResponse<EmotesResponse>>($"v1/channels/{channelName}/emotes");
                 if (res != null)
                     return res.Data;
             }
@@ -110,11 +110,11 @@ namespace AltStreamLib.Api
         /// </summary>
         /// <param name="channelName"></param>
         /// <returns><see cref="TagsResponse"/> or null</returns>
-        public  async Task<TagsResponse> GetTagsInfoAsync(string channelName)
+        public  async Task<TagsResponse?> GetTagsInfoAsync(string channelName)
         {
             if (HttpManager.Singleton is not null)
             {
-                var res = await HttpManager.Singleton.SendRequestAsync<ApiResponse<TagsResponse>>($"v1/channels/{channelName}/tags");
+                var res = await HttpManager.Singleton.SendGetRequestAsync<ApiResponse<TagsResponse>>($"v1/channels/{channelName}/tags");
                 if (res != null)
                     return res.Data;
             }
@@ -128,10 +128,10 @@ namespace AltStreamLib.Api
         /// <param name="channelName">Info to get</param>
         /// <param name="relativeChannel">Channel to get info relative to</param>
         /// <returns><see cref="UserSettingsResponse"/> or null</returns>
-        public async Task<UserSettingsResponse> GetUserSettingsInfoAsync(string channelName, string relativeChannel = "")
+        public async Task<UserSettingsResponse?> GetUserSettingsInfoAsync(string channelName, string relativeChannel = "")
         {
             if (HttpManager.Singleton is null) return null;
-            return await HttpManager.Singleton.SendRequestAsync<UserSettingsResponse>(
+            return await HttpManager.Singleton.SendGetRequestAsync<UserSettingsResponse>(
                 $"v1/user-settings/{channelName}{(string.IsNullOrEmpty(relativeChannel) ? "" : $"?channel={relativeChannel}")}");
         }
 
@@ -139,10 +139,60 @@ namespace AltStreamLib.Api
         /// Get all stickers available on the site.
         /// </summary>
         /// <returns><see cref="StickersResponse"/> or null</returns>
-        public async Task<StickersResponse> GetStickersAsync()
+        public async Task<StickersResponse?> GetStickersAsync()
         {
             if (HttpManager.Singleton is null) return null;
-            return await HttpManager.Singleton.SendRequestAsync<StickersResponse>("stickers");
+            return await HttpManager.Singleton.SendGetRequestAsync<StickersResponse>("stickers");
+        }
+
+        /// <summary>
+        /// Get the current title for given <paramref name="channelName"/>.
+        /// </summary>
+        /// <param name="channelName"></param>
+        /// <returns><see cref="string"/> or null</returns>
+        public async Task<string?> GetCurrentTitleAsync(string channelName)
+        {
+            if (HttpManager.Singleton is not null)
+            {
+                var res = await HttpManager.Singleton.SendGetRequestAsync<TitleResponse>($"live/title?channel={channelName}");
+                if (res != null)
+                    return res.Title;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Get the current live <see cref="Game"/> for given <paramref name="channelName"/>.
+        /// </summary>
+        /// <param name="channelName"></param>
+        /// <returns><see cref="Game"/> or null</returns>
+        public async Task<Game?> GetCurrentGame(string channelName)
+        {
+            if (HttpManager.Singleton is not null)
+            {
+                var res = await HttpManager.Singleton.SendGetRequestAsync<GameResponse>($"live/game?channel={channelName}");
+                if (res != null)
+                    return res.Game;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Get list of recent <see cref="Game"/> for given <paramref name="channelName"/>.
+        /// </summary>
+        /// <param name="channelName"></param>
+        /// <param name="limit">Optional limit to results</param>
+        /// <returns>List of <see cref="Game"/> or null</returns>
+        public async Task<List<Game>?> GetRecentGamesAsync(string channelName, int limit = -1)
+        {
+            if (HttpManager.Singleton is not null)
+            {
+                string limitRes = limit > -1 ? $"&limit={limit}" : string.Empty;
+                var res = await HttpManager.Singleton.SendGetRequestAsync<RecentGamesResponse>($"live/game/recent?channel={channelName}{limitRes}");
+                if (res != null)
+                    return res.Games;
+            }
+            return null;
         }
 
         /// <summary>
@@ -150,10 +200,10 @@ namespace AltStreamLib.Api
         /// </summary>
         /// <param name="channelName"></param>
         /// <returns><see cref="AchievementsResponse"/> or null</returns>
-        public async Task<AchievementsResponse> GetAchievementsAsync(string channelName)
+        public async Task<AchievementsResponse?> GetAchievementsAsync(string channelName)
         {
             if (HttpManager.Singleton is null) return null;
-            return await HttpManager.Singleton.SendRequestAsync<AchievementsResponse>($"v1/achievements/{channelName}");
+            return await HttpManager.Singleton.SendGetRequestAsync<AchievementsResponse>($"v1/achievements/{channelName}");
         }
 
         /// <summary>
@@ -161,23 +211,25 @@ namespace AltStreamLib.Api
         /// </summary>
         /// <param name="channelName"></param>
         /// <returns><see cref="User"/> or null</returns>
-        public async Task<User> GetUserInfoAsync(string channelName)
+        public async Task<User?> GetUserInfoAsync(string channelName)
         {
             if (HttpManager.Singleton is null) return null;
-            return await HttpManager.Singleton.SendRequestAsync<User>($"v2/users/{channelName}");
+            return await HttpManager.Singleton.SendGetRequestAsync<User>($"v2/users/{channelName}");
         }
 
         /// <summary>
-        /// Get a list of <see cref="Redemption"/>s for a given <paramref name="channelName"/>.
+        /// Get a list of <see cref="Redemption"/>s for a given <paramref name="channelName"/>.<br/>
         /// </summary>
         /// <param name="channelName"></param>
+        /// <param name="status">Optional filter by <see cref="RedemptionStatus"/></param>
+        /// <param name="limit">Optional limit to results</param>
         /// <returns>List of <see cref="Redemption"/> or null</returns>
-        public async Task<RedemptionsResponse> GetRedemptionsAsync(string channelName, RedemptionStatus status = RedemptionStatus.None, int limit = -1)
+        public async Task<RedemptionsResponse?> GetRedemptionsAsync(string channelName, RedemptionStatus status = RedemptionStatus.None, int limit = -1)
         {
             if (HttpManager.Singleton is null) return null;
             string statusRes = status is not RedemptionStatus.None ? $"&status={status.ToString().ToLower()}" : string.Empty;
             string limitRes = limit > -1 ? $"&limit={limit}" : string.Empty;
-            return await HttpManager.Singleton.SendRequestAsync<RedemptionsResponse>($"v2/rewards/redemptions?channel={channelName}{limitRes}");
+            return await HttpManager.Singleton.SendGetRequestAsync<RedemptionsResponse>($"v2/rewards/redemptions?channel={channelName}{limitRes}");
         }
 
         /// <summary>
@@ -185,10 +237,10 @@ namespace AltStreamLib.Api
         /// </summary>
         /// <param name="channelName"></param>
         /// <returns><see cref="ModResponse"/> or null</returns>
-        public async Task<ModResponse> GetModInfoAsync(string channelName)
+        public async Task<ModResponse?> GetModInfoAsync(string channelName)
         {
             if (HttpManager.Singleton is null) return null;
-            return await HttpManager.Singleton.SendRequestAsync<ModResponse>($"chat/mod?channel={channelName}");
+            return await HttpManager.Singleton.SendGetRequestAsync<ModResponse>($"chat/mod?channel={channelName}");
         }
 
         /// <summary>
@@ -197,10 +249,10 @@ namespace AltStreamLib.Api
         /// </summary>
         /// <param name="channelName"></param>
         /// <returns><see cref="ChatUsersRequest"/> or null</returns>
-        public async Task<ChatUsersRequest> GetChatUsersAsync(string channelName)
+        public async Task<ChatUsersRequest?> GetChatUsersAsync(string channelName)
         {
             if (Session is null || HttpManager.Singleton is null) return null;
-            return await HttpManager.Singleton.SendRequestAsync<ChatUsersRequest>($"admin/chat-users?channel={channelName}");
+            return await HttpManager.Singleton.SendGetRequestAsync<ChatUsersRequest>($"admin/chat-users?channel={channelName}");
         }
 
         /// <summary>
@@ -209,10 +261,11 @@ namespace AltStreamLib.Api
         /// </summary>
         /// <param name="limit">Optional limit to results</param>
         /// <returns><see cref="ActivityResponse"/> or null</returns>
-        public async Task<ActivityResponse> GetActivityAsync(int limit = -1)
+        public async Task<ActivityResponse?> GetActivityAsync(int limit = -1)
         {
             if (Session is null || HttpManager.Singleton is null) return null;
-            return await HttpManager.Singleton.SendRequestAsync<ActivityResponse>($"activity?channel={Session.User.Username}{(limit == -1 ? "" : $"&limit={limit}")}");
+            string limitRes = limit > -1 ? $"&limit={limit}" : string.Empty;
+            return await HttpManager.Singleton.SendGetRequestAsync<ActivityResponse>($"activity?channel={Session.User.Username}{limitRes}");
         }
 
         /// <summary>
@@ -220,10 +273,10 @@ namespace AltStreamLib.Api
         /// <para>Requires Auth</para>
         /// </summary>
         /// <returns><see cref="SubscribersResponse"/> or null</returns>
-        public async Task<SubscribersResponse> GetSubscribersAsync()
+        public async Task<SubscribersResponse?> GetSubscribersAsync()
         {
             if (Session is null || HttpManager.Singleton is null) return null;
-            return await HttpManager.Singleton.SendRequestAsync<SubscribersResponse>($"user-settings/kofi-subscribers?channel={Session.User.Username}");
+            return await HttpManager.Singleton.SendGetRequestAsync<SubscribersResponse>($"user-settings/kofi-subscribers?channel={Session.User.Username}");
         }
 
         /// <summary>
@@ -233,7 +286,7 @@ namespace AltStreamLib.Api
         public async Task GetSessionAsync()
         {
             if (HttpManager.Singleton is null) return;
-            var temp = await HttpManager.Singleton.SendRequestAsync<SessionResponse>("auth/session");
+            var temp = await HttpManager.Singleton.SendGetRequestAsync<SessionResponse>("auth/session");
             if (temp is not null)
                 Session = temp;
         }
@@ -245,7 +298,7 @@ namespace AltStreamLib.Api
         public async Task GetStreamKeyAsync()
         {
             if (HttpManager.Singleton is null) return;
-            var temp = await HttpManager.Singleton.SendRequestAsync<StreamKeyResponse>("stream-key");
+            var temp = await HttpManager.Singleton.SendGetRequestAsync<StreamKeyResponse>("stream-key");
             if (temp is not null)
                 _streamKey = temp;
         }
@@ -256,10 +309,10 @@ namespace AltStreamLib.Api
         /// </summary>
         /// <param name="query">Search Query</param>
         /// <returns>Returns List of <see cref="UpdateGameRequest"/></returns>
-        public async Task<List<UpdateGameRequest>> GetGameSearchAsync(string query)
+        public async Task<List<UpdateGameRequest>?> GetGameSearchAsync(string query)
         {
             if (_streamKey is null || !_streamKey.HasStreamKey || HttpManager.Singleton is null) return null;
-            return await HttpManager.Singleton.SendRequestAsync<List<UpdateGameRequest>>($"live/game/search?q={query}&key={_streamKey}");
+            return await HttpManager.Singleton.SendGetRequestAsync<List<UpdateGameRequest>>($"live/game/search?q={query}&key={_streamKey}");
         }
         #endregion
 
@@ -280,7 +333,7 @@ namespace AltStreamLib.Api
         /// <param name="maxPerStream"></param>
         /// <param name="maxGlobalPerStream"></param>
         /// <returns><see cref="RequestResponse"/> or null</returns>
-        public async Task<RequestResponse> UpdateRewardAsync(int rewardId, string rewardName, string rewardDesc, int rewardCost, bool enabled, bool isHighlight,
+        public async Task<RequestResponse?> UpdateRewardAsync(int rewardId, string rewardName, string rewardDesc, int rewardCost, bool enabled, bool isHighlight,
             bool requireUserInput, int? cooldownSeconds = null, int? globalCooldownSeconds = null, int? maxPerStream = null, int? maxGlobalPerStream = null)
         {
             if (Session is not null && HttpManager.Singleton is not null)
@@ -297,23 +350,20 @@ namespace AltStreamLib.Api
         /// Set the current game.<br/>
         /// Can get game info from <seealso cref="GetGameSearchAsync(string)"/>.
         /// <para>Requires Auth and Stream Key</para>
-        /// </summary>
-        /// <param name="id"></param>
         /// <param name="igdbId"></param>
-        /// <param name="name"></param>
-        /// <param name="slug"></param>
-        /// <param name="coverUrl"></param>
-        /// <param name="steamId"></param>
+        /// <param name="adult"></param>
+        /// <param name="ai"></param>
+        /// <param name="aiDetails"></param>
+        /// <param name="aiTools"></param>
+        /// <param name="aiToolDetail"></param>
         /// <returns><see cref="RequestResponse"/> or null</returns>
-        public async Task<RequestResponse> ChangeStreamGameAsync(int id, int igdbId, string name, string slug, string coverUrl = null, string steamId = null)
+        public async Task<RequestResponse?> ChangeStreamGameAsync(
+            int igdbId, bool adult = false, bool ai = false, string? aiDetails = null, bool aiTools = false, string? aiToolDetail = null)
         {
             if (Session is not null && _streamKey is not null && _streamKey.HasStreamKey is true && HttpManager.Singleton is not null)
             {
                 var gamePayload = new UpdateGameRequest(
-                    id, igdbId, name, slug,
-                    coverUrl, steamId, _streamKey.StreamKey,
-                    Session.User.Username, null, false, null
-                );
+                    Session.User.Id, igdbId, adult, ai, aiDetails, aiTools, aiToolDetail, Session.User.Username, _streamKey.StreamKey);
                 return await HttpManager.Singleton.SendPutRequestAsync<UpdateGameRequest, RequestResponse>("live/game", gamePayload);
             }
             return null;
@@ -329,7 +379,7 @@ namespace AltStreamLib.Api
         /// <param name="content"></param>
         /// <param name="replyToId"></param>
         /// <returns><see cref="RequestResponse"/> or null</returns>
-        public async Task<RequestResponse> SendChatMessageAsync(string channelName, string content, string replyToId = null)
+        public async Task<RequestResponse?> SendChatMessageAsync(string channelName, string content, string replyToId = null)
         {
             if (HttpManager.Singleton is not null)
             {
@@ -345,7 +395,7 @@ namespace AltStreamLib.Api
         /// <param name="channel"></param>
         /// <param name="target"></param>
         /// <returns><see cref="RequestResponse"/> or null</returns>
-        public async Task<RequestResponse> SendShoutoutAsync(string channel, string target)
+        public async Task<RequestResponse?> SendShoutoutAsync(string channel, string target)
         {
             if (HttpManager.Singleton is not null)
             {
@@ -406,7 +456,7 @@ namespace AltStreamLib.Api
         /// <param name="id"></param>
         /// <param name="state"></param>
         /// <returns><see cref="RequestResponse"/> or null</returns>
-        public async Task<RequestResponse> SetRewardStateAsync(int id, bool state)
+        public async Task<RequestResponse?> SetRewardStateAsync(int id, bool state)
         {
             if (Session is not null && HttpManager.Singleton is not null)
             {
@@ -422,7 +472,7 @@ namespace AltStreamLib.Api
         /// </summary>
         /// <param name="orderedIds"></param>
         /// <returns><see cref="RequestResponse"/> or null</returns>
-        public async Task<RequestResponse> SetRewardOrderAsync(int[] orderedIds)
+        public async Task<RequestResponse?> SetRewardOrderAsync(int[] orderedIds)
         {
             if (Session is not null && HttpManager.Singleton is not null)
             {
@@ -439,7 +489,7 @@ namespace AltStreamLib.Api
         /// <param name="redemptionId"></param>
         /// <param name="state"></param>
         /// <returns><see cref="RequestResponse"/> or null</returns>
-        public async Task<RequestResponse> SetRewardFulfillmentAsync(string channelName, int redemptionId, Fulfillment state)
+        public async Task<RequestResponse?> SetRewardFulfillmentAsync(string channelName, int redemptionId, Fulfillment state)
         {
             if (HttpManager.Singleton is not null)
             {
@@ -499,11 +549,11 @@ namespace AltStreamLib.Api
         /// <param name="account">Email or Username</param>
         /// <param name="password"></param>
         /// <returns>A json <see cref="string"/> of your cookies. Null if unsuccessful</returns>
-        public async Task<string> AuthenticateAsync(string account, string password)
+        public async Task<string?> AuthenticateAsync(string account, string password)
         {
             if (HttpManager.Singleton is not null)
             {
-                var authResponse = await HttpManager.Singleton.SendRequestAsync<AuthResponse>("auth/csrf");
+                var authResponse = await HttpManager.Singleton.SendGetRequestAsync<AuthResponse>("auth/csrf");
                 if (authResponse is not null)
                 {
                     var tokenRequest = new AuthTokenRequest(account, password, authResponse.Token);

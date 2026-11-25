@@ -10,69 +10,60 @@ namespace AltStreamLib.Api.Models.Live
     public class UpdateGameRequest
     {
 
-        [JsonProperty("id")]
-        public int Id { get; set; }
+        [JsonProperty("userId")]
+        public string UserId { get; set; }
     
         [JsonProperty("igdbId")]
         public int IgdbId { get; set; }
-    
-        [JsonProperty("name")]
-        public string Name { get; set; }
-    
-        [JsonProperty("slug")]
-        public string Slug { get; set; }
-    
-        [JsonProperty("coverUrl")]
-        public string CoverUrl { get; set; }
-    
-        [JsonProperty("steamAppId")]
-        public string SteamAppId { get; set; }
-    
-        [JsonProperty("summary")]
-        public string Summary { get; set; }
-    
-        [JsonProperty("streamKey")]
-        public string StreamKey { get; set; }
-    
-        [JsonProperty("username")]
-        public string Username { get; set; }
-    
+
+        [JsonProperty("adultDisclosed")]
+        public bool AdultDisclosed { get; set; }
+
+        [JsonProperty("aiDisclosed")]
+        public bool AiDisclosed { get; set; }
+
+        [JsonProperty("aiDetails")]
+        public string AiDetails { get; set; }
+
         [JsonProperty("usesAiStreamerTools")]
         public bool UsesAiStreamerTools { get; set; }
     
         [JsonProperty("aiStreamerToolsDetails")]
         public string AiStreamerToolsDetails { get; set; }
+    
+        [JsonProperty("username")]
+        public string Username { get; set; }
 
-        public UpdateGameRequest(int id, int igdbId, string name, string slug, string coverUrl, string steamAppId, string summary, string streamKey, string username, bool usesAiStreamerTools, string aiStreamerToolsDetails)
+        [JsonProperty("streamKey")]
+        public string StreamKey { get; set; }
+
+        public UpdateGameRequest(string userId, int igdbId, bool adultDisclosed, bool aiDisclosed, string aiDetails,
+            bool usesAiStreamerTools, string aiStreamerToolsDetails, string username, string streamKey)
         {
-            this.Id = id;
+            this.UserId = userId;
             this.IgdbId = igdbId;
-            this.Name = name;
-            this.Slug = slug;
-            this.CoverUrl = coverUrl;
-            this.SteamAppId = steamAppId;
-            this.Summary = summary;
-            this.StreamKey = streamKey;
-            this.Username = username;
+            this.AdultDisclosed = adultDisclosed;
+            this.AiDisclosed = aiDisclosed;
+            this.AiDetails = aiDetails;
             this.UsesAiStreamerTools = usesAiStreamerTools;
             this.AiStreamerToolsDetails = aiStreamerToolsDetails;
+            this.Username = username;
+            this.StreamKey = streamKey;
         }
 
         public UpdateGameRequest() { }
     }
 #elif NET9_0_OR_GREATER
     public record UpdateGameRequest(
-        [property: JsonPropertyName("id")] int Id,
+        [property: JsonPropertyName("userId")] string? UserId,
         [property: JsonPropertyName("igdbId")] int IgdbId,
-        [property: JsonPropertyName("name")] string Name,
-        [property: JsonPropertyName("slug")] string Slug,
-        [property: JsonPropertyName("coverUrl")] string? CoverUrl,
-        [property: JsonPropertyName("steamAppId")] string? SteamAppId,
-        [property: JsonPropertyName("summary")] string? Summary,
-        [property: JsonPropertyName("streamKey")] string? StreamKey,
-        [property: JsonPropertyName("username")] string? Username,
-        [property: JsonPropertyName("usesAiStreamerTools")] bool? UsesAiStreamerTools,
-        [property: JsonPropertyName("aiStreamerToolsDetails")] string? AiStreamerToolsDetails
+        [property: JsonPropertyName("adultDisclosed")] bool AdultDisclosed,
+        [property: JsonPropertyName("aiDisclosed")] bool AiDisclosed,
+        [property: JsonPropertyName("aiDetails")] string? AiDetails,
+        [property: JsonPropertyName("usesAiStreamerTools")] bool UsesAiStreamerTools,
+        [property: JsonPropertyName("aiStreamerToolsDetails")] string? AiStreamerToolsDetails,
+        [property: JsonPropertyName("username")] string Username,
+        [property: JsonPropertyName("streamKey")] string StreamKey
     );
 #endif
 }

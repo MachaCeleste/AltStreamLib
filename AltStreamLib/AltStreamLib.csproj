@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>net9.0;net461;net472;net481</TargetFrameworks>
     <Title>AltStream Lib</Title>
-    <Version>0.4.42</Version>
+    <Version>0.4.48</Version>
     <Authors>Macha Celeste</Authors>
     <Company>Celestial Corp</Company>
     <Description>A C# wrapper for altstream.online API</Description>
@@ -45,7 +45,7 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
-    <None Include="D:\old OS (7)\Users\Haceo\Pictures\macha_flower_clean_centered.png">
+    <None Include="..\..\..\GlobalObject\macha_flower_clean_centered.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
@@ -54,7 +54,6 @@
   <ItemGroup Condition="'$(TargetFramework.TrimStart(`net`))'=='461' Or '$(TargetFramework.TrimStart(`net`))'=='472' Or '$(TargetFramework.TrimStart(`net`))'=='481'">
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
-    <PackageReference Include="System.Net.Http.Json" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
