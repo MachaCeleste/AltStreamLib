@@ -308,11 +308,11 @@ namespace AltStreamLib.Api
         /// <para>Requires Auth and Stream Key</para>
         /// </summary>
         /// <param name="query">Search Query</param>
-        /// <returns>Returns List of <see cref="Game"/></returns>
+        /// <returns>Returns List of <see cref="Game"/> or null</returns>
         public async Task<List<Game>?> GetGameSearchAsync(string query)
         {
             if (_streamKey is null || !_streamKey.HasStreamKey || HttpManager.Singleton is null) return null;
-            return await HttpManager.Singleton.SendGetRequestAsync<List<Game>>($"live/game/search?q={query}&key={_streamKey}");
+            return await HttpManager.Singleton.SendGetRequestAsync<List<Game>>($"live/game/search?q={query}&key={_streamKey.StreamKey}");
         }
         #endregion
 
