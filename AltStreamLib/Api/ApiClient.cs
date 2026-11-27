@@ -311,8 +311,13 @@ namespace AltStreamLib.Api
         /// <returns>Returns List of <see cref="Game"/> or null</returns>
         public async Task<List<Game>?> GetGameSearchAsync(string query)
         {
-            if (_streamKey is null || !_streamKey.HasStreamKey || HttpManager.Singleton is null) return null;
-            return await HttpManager.Singleton.SendGetRequestAsync<List<Game>>($"live/game/search?q={query}&key={_streamKey.StreamKey}");
+            if (_streamKey is not null && _streamKey.HasStreamKey is true && HttpManager.Singleton is not null)
+            {
+                var res = await HttpManager.Singleton.SendGetRequestAsync<RecentGamesResponse>($"live/game/search?q={query}&key={_streamKey.StreamKey}");
+                if (res is not null)
+                    return res.Games;
+            }
+            return null;
         }
         #endregion
 
@@ -347,7 +352,7 @@ namespace AltStreamLib.Api
         }
 
         /// <summary>
-        /// Set the current game.<br/>
+        /// Set the current game and other stream metadata.<br/>
         /// Can get game info from <seealso cref="GetGameSearchAsync(string)"/>.
         /// <para>Requires Auth and Stream Key</para>
         /// <param name="igdbId"></param>
@@ -360,10 +365,9 @@ namespace AltStreamLib.Api
         public async Task<RequestResponse?> ChangeStreamGameAsync(
             int igdbId, bool adult = false, bool ai = false, string? aiDetails = null, bool aiTools = false, string? aiToolDetail = null)
         {
-            if (Session is not null && _streamKey is not null && _streamKey.HasStreamKey is true && HttpManager.Singleton is not null)
+            if (_streamKey is not null && _streamKey.HasStreamKey is true && HttpManager.Singleton is not null)
             {
-                var gamePayload = new UpdateGameRequest(
-                    Session.User.Id, igdbId, adult, ai, aiDetails, aiTools, aiToolDetail, Session.User.Username, _streamKey.StreamKey);
+                var gamePayload = new UpdateGameRequest(igdbId, adult, ai, aiDetails, aiTools, aiToolDetail, Session.User.Username, _streamKey.StreamKey);
                 return await HttpManager.Singleton.SendPutRequestAsync<UpdateGameRequest, RequestResponse>("live/game", gamePayload);
             }
             return null;
@@ -439,7 +443,7 @@ namespace AltStreamLib.Api
         /// <returns>False if unsuccessful</returns>
         public async Task<bool> ChangeStreamTitleAsync(string title)
         {
-            if (Session is not null && _streamKey is not null && _streamKey.HasStreamKey is true && HttpManager.Singleton is not null)
+            if (_streamKey is not null && _streamKey.HasStreamKey is true && HttpManager.Singleton is not null)
             {
                 var titlePayload = new UpdateTitleRequest(_streamKey.StreamKey, title, Session.User.Username);
                 return await HttpManager.Singleton.SendPostRequestAsync<UpdateTitleRequest>("live/title", titlePayload);

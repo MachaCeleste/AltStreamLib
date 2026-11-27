@@ -12,7 +12,7 @@ namespace AltStreamLib.Api.Models
         [JsonProperty("streamKey")]
         public string StreamKey { get; set; }
     
-        [JsonProperty("hasStreamerKey")]
+        [JsonProperty("hasStreamKey")]
         public bool HasStreamKey { get; set; }
 
         public StreamKeyResponse(string streamKey, bool hasStreamKey)
@@ -26,7 +26,7 @@ namespace AltStreamLib.Api.Models
 #elif NET9_0_OR_GREATER
     public record StreamKeyResponse(
         [property: JsonPropertyName("streamKey")] string StreamKey,
-        [property: JsonPropertyName("hasStreamerKey")] bool HasStreamKey
+        [property: JsonPropertyName("hasStreamKey")] bool HasStreamKey
     );
 #endif
 }

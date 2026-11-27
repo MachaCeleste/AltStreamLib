@@ -86,7 +86,7 @@ namespace AltStreamLib.EventSub.Chat.Models
         [EnumMember(Value = "shoutout")] Shoutout,
         [EnumMember(Value = "clear")] Clear,
         [EnumMember(Value = "delete")] Delete,
-        [EnumMember(Value = "system")] System
+        [EnumMember(Value = "system_message")] System
     }
 #elif NET9_0_OR_GREATER
     public record Data(
@@ -123,7 +123,7 @@ namespace AltStreamLib.EventSub.Chat.Models
         [JsonStringEnumMemberName("shoutout")] Shoutout,
         [JsonStringEnumMemberName("clear")] Clear,
         [JsonStringEnumMemberName("delete")] Delete,
-        [JsonStringEnumMemberName("system")] System
+        [JsonStringEnumMemberName("system_message")] System
     }
 #endif
 }

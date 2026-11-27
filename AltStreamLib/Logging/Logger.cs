@@ -21,21 +21,21 @@ namespace AltStreamLib.Logging
     }
 
 #if NET461 || NET472 || NET481
-public class LogMessage
-{
-    public LogLevel LogLevel { get; set; }
-    public string Message { get; set; }
-    public Exception Error { get; set; }
-
-    public LogMessage(LogLevel logLevel, string message, Exception error)
+    public class LogMessage
     {
-        this.LogLevel = logLevel;
-        this.Message = message;
-        this.Error = error;
-    }
+        public LogLevel LogLevel { get; set; }
+        public string Message { get; set; }
+        public Exception Error { get; set; }
 
-    public LogMessage() { }
-}
+        public LogMessage(LogLevel logLevel, string message, Exception error)
+        {
+            this.LogLevel = logLevel;
+            this.Message = message;
+            this.Error = error;
+        }
+
+        public LogMessage() { }
+    }
 #elif NET9_0_OR_GREATER
     public record LogMessage(
         LogLevel LogLevel,

@@ -9,10 +9,6 @@ namespace AltStreamLib.Api.Models.Live
 #if NET461 || NET472 || NET481
     public class UpdateGameRequest
     {
-
-        [JsonProperty("userId")]
-        public string UserId { get; set; }
-    
         [JsonProperty("igdbId")]
         public int IgdbId { get; set; }
 
@@ -37,10 +33,9 @@ namespace AltStreamLib.Api.Models.Live
         [JsonProperty("streamKey")]
         public string StreamKey { get; set; }
 
-        public UpdateGameRequest(string userId, int igdbId, bool adultDisclosed, bool aiDisclosed, string aiDetails,
+        public UpdateGameRequest(int igdbId, bool adultDisclosed, bool aiDisclosed, string aiDetails,
             bool usesAiStreamerTools, string aiStreamerToolsDetails, string username, string streamKey)
         {
-            this.UserId = userId;
             this.IgdbId = igdbId;
             this.AdultDisclosed = adultDisclosed;
             this.AiDisclosed = aiDisclosed;
@@ -55,7 +50,6 @@ namespace AltStreamLib.Api.Models.Live
     }
 #elif NET9_0_OR_GREATER
     public record UpdateGameRequest(
-        [property: JsonPropertyName("userId")] string? UserId,
         [property: JsonPropertyName("igdbId")] int IgdbId,
         [property: JsonPropertyName("adultDisclosed")] bool AdultDisclosed,
         [property: JsonPropertyName("aiDisclosed")] bool AiDisclosed,
