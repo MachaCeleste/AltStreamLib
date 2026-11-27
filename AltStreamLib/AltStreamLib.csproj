@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>net9.0;net461;net472;net481</TargetFrameworks>
     <Title>AltStream Lib</Title>
-    <Version>0.4.48</Version>
+    <Version>0.4.49</Version>
     <Authors>Macha Celeste</Authors>
     <Company>Celestial Corp</Company>
     <Description>A C# wrapper for altstream.online API</Description>
